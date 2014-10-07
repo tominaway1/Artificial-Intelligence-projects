@@ -1,0 +1,58 @@
+Part 1
+Why I chose the grammar that I chose:
+I set up my grammar in the way that I did to keep everything structured and organize. I decided that number agreement should be a vital part of my grammar because subject verb agreement greatly impacts the semantics of a sentence. As a result, I had to create two classes of verbs, nouns, and determiners. Thankfully, adjectives and adverbs are usually not tense sensitive. To allow for a competent grammar, I allowed an infinite number of adjectives to come before any nouns or verb. For auxillary verbs, I decided to create a separate class for verbs that can come after because not all verbs can be attached with an auxillary verb and it would be a lot better to just create a new class for them. Everything else is pretty straight forward in the grammar and follows the syntactic rules needed to generate the five sentences.
+
+
+Part 2
+The following are the input and output of the five sentences.
+
+Sentence 1) 
+Input: (defparameter rules1 '((Sentence 0)(SNP 0)(SNoun 0)(Adjective 1)(SNoun 1)(SVP 2)(SVP 1)(AXP 0)(AuxPro 0)(AuxVP 0)(SNP 2)(SNP 1)(SDet 2)(SNoun 0)(Adjective 2)(SNoun 2)(PP 0)(Preposition 1)(SNP 0)(SNoun 3))) 
+Output: (HIGHER EDUCATION MUST COUNTER THE PREVAILING NARRATIVE OF POLARIZATION)
+
+Sentence 2) 
+Input: (defparameter rules2 '((sentence 0)(SNP 1)(Sdet 1)(SNoun 0)(Adjective 3)(SNoun 4)(SVP 2)(SVP 1)(AXP 1)(AuxPro 2)(Adverb 0)(AuxVP 1)(SNP 1)(SDet 2)(SNoun 0)(Adjective 4)(SNoun 5)))
+Output:(THIS FLAWED STRATEGY WILL HARDLY ACHIEVE THE DESIRED INTENT)
+
+Sentence 3)
+Input:(defparameter rules3 '((Sentence 1)(PNP 5)(PPronoun 0)(PVP 2)(PVP 0)(PVerb 0)(PNP 3)(PNP 2)(PNP 0)(PNoun 0)(Adjective 5)(PNoun 0) (Adjective 0)(noun-adjunct 1)(PNoun 2)(PP 1)(Preposition 2)(PNP 0)(PNoun 0)(Adjective 6)(PNoun 3)(PNP 3)(RelativeClause 0)(Rel-conj 0)(SVP 4)(SVP 5)(SVP 7)(SVP 0)(SVerb 0)(Infinitive 0)(SVerb 1)(Adverb 1)(PP 1)(Preposition 0)(PrepDet 0)(DetPrep 0)(PNP 4)(Noun 0)(SNP 0) (SNoun 6)(ListConj 0)(Noun 1)(PNP 4)(Noun 1)(PNP 0)(PNoun 0)(Adjective 7)(PNoun 4)(ListConj 0)(Noun 0)(SNP 0)(SNoun 0)(Adjective 0)(noun-adjunct 0)(SNoun 7))) 
+
+Sentence 4)
+Input:(defparameter rules4 '((sentence 2)(sentence 0)(SNP 1)(SDet 2)(SNoun 8)(SVP 4)(SVP 1)(AXP 3)(AuxPro 2)(Adverb 2)(AuxVP 2)
+(Adjective 8)(PP 0)(Preposition 3)(SNP 1)(Sdet 2)(Snoun 0)(Adjective 9)(Snoun 9)(coordinate-conj 1)(sentence 1)(PNP 0)(PNoun 0)
+(Adjective 0)(noun-adjunct 2)(PNoun 7)(PVP 4)(PVP 7)(PVP 1)(AXP 2)(AuxPro 3)(AuxVP 2)(Adjective 10)(Infinitive 1)(SVerb 2)(Noun 0)(SNP 4)
+(SPronoun 0)(PP 1)(Preposition 4)(PNP 0)(PNoun 6)))
+Output:(THERE WERE SOLID JOB GAINS IN SEVERAL INDUSTRIES THAT TEND TO PAY WELL SUCH AS BUSINESS AND PROFESSIONAL SERVICES AND HEALTH CARE)
+
+Sentence 5)
+Input:(defparameter rules5 '((Sentence 3)(Sub-conjunction 0)(sentence 0)(SNP 1)(SDet 2)(SNoun 10)(SVP 4)(SVP 2)(SVP 1)(AXP 0)(AuxPro 2)(AuxVP 3)(SNP 1)(SDet 2)(SNoun 0)(Adjective 0)(noun-adjunct 3)(SNoun 12)(PP 0)(Preposition 2)(SNP 1)(SDet 2)(SNoun 11)(VP 0)(SVP 4)(SVP 1)(AXP 2)(AuxPro 2)(AuxVP 2)(Adjective 12)(PP 1)(Preposition 2)(PNP 6)(PQuantifiers 0)(PQDet 0)(PQuant 0)(SNoun 0)(Adjective 11)(PNoun 5)))
+Output:(WHETHER THE PROSECUTION WILL SEEK THE DEATH PENALTY IN THE CASE WILL BE DECIDED IN A FEW WEEKS)
+
+
+Part 3 
+
+1) Rejects sentences that are too long (set a limit N1 on the maximum number of words, for instance 40) 
+This was a very straight forward function that took a list and returned a boolean based off of whether the
+size of the list was less than 40. 
+
+2) Rejects sentences with tree depth larger than N2, for instance 10
+I modified the random sentence function by creating two global variables. One is the depth so that when I 
+do recursion, I can keep track of the depth at every level. The other was the sentence so that I can turn the
+sentence to Nil if the depth ever exceeded 40 (I chose 40 because the depth of a typical sentence for me was
+around that number). Finally, I wrote a new function generate_sentence that ran random-sentence until the depth did not exceed 40. If it did, I reran the function and otherwise I returned the sentence as an array 
+
+3) Rejects sentences where the same word appears twice (except some closed class words, e.g., prepositions, articles, conjunctions (‘the’, ‘a’, ‘and’, ‘but’…)
+I first created an array of all words that can be repeated twice. Thankfully, the rewrites function was given
+to us so I could just append the result of rewrites on all the rules that I wanted to include (ie preposition, 
+determiners etc). Then I created an empty list and in a while loop, I checked every element in the list to see if
+it was in the set of words that can be repeated, already in the list, or not in the list. If it wasnt in the list, I added it to the list and moved on to the next word, and otherwise I returned False. 
+
+4) Rejects sentences based on at least two other criteria of your choice (5 points)
+Here were the two criteria that I added:
+i) prepp
+This function checks to see if the number of prepositions in total exceeds 5. Through my random generation, I realized that I could have multiple prepositions in a row and that it would be useful to limit the total number to a low number. It can be called using (prepp sentence) where list is a list. It returns true if there are 4 or less prepositions and false otherwise
+
+ii) adjp
+This function checks to see if the number of consecutive adjectives in total exceeds 3. Through my random generation, I realized that I could have multiple adjectives in a row and that it would be useful to limit the total number to a low number. It can be called using (adjp sentence) where sentence is a list. It returns true if there isn't three or more adjectives in a row and false otherwise
+
+

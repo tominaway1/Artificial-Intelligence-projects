@@ -1,0 +1,19 @@
+(load "grammar_ti2181.lisp")
+(targeted-sentence rules1)
+(targeted-sentence rules2)
+(targeted-sentence rules3)
+(targeted-sentence rules4)
+(targeted-sentence rules5)
+
+(load "grammar_ti2181.lisp")
+(generate-sentence 'sentence)
+
+(generate-tree 'sentence)
+(generateValid 'sentence)
+
+
+(load "grammar_ti2181.lisp")
+(generateValid 'sentence)
+
+(load "grammar_ti2181.lisp")
+(loop-run 1000)
