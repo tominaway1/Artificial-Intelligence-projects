@@ -22,7 +22,7 @@ class GreedyEngine(Engine):
         
         # Create a deepcopy of the board to preserve the state of the actual board
         newboard = deepcopy(board)
-        newboard.execute_move(move, color)
+        newboard.execute_move(move, 1)
 
         # Count the # of pieces of each color on the board
         num_pieces_op = len(newboard.get_squares(color*-1))
