@@ -1,22 +1,32 @@
 from engines import Engine
 from copy import deepcopy
+game_time=100000
+time = { -1 : game_time, 1 : game_time }
 
 class StudentEngine(Engine):
+    print "Penis6.9"
     """ Game engine that implements a simple fitness function maximizing the
     difference in number of pieces in the given color's favor. """
     def __init__(self):
         self.alpha_beta = False
-        self.DEPTH = 3
+        self.DEPTH = 2
     def get_move(self, board, color, move_num=None,
                  time_remaining=None, time_opponent=None):
-        answer = self._do_minimax(board,color)
+        if self.alpha_beta:
+            answer = self._do_alpha_beta_minimax(board,color)
+        else:
+            answer = self._do_minimax(board,color)
         return answer
+
+    def _do_minimax(self, board, color):
+        moves = board.get_legal_moves(color)
+        print moves
+        return max(moves, key=lambda move: self._get_cost(board, color, color*-1, move,self.DEPTH))
 
     def _get_cost(self, board, color, current, move ,depth):
         # Create a deepcopy of the board to preserve the state of the actual board
         newboard = deepcopy(board)
         newboard.execute_move(move, current)
-        
         moves = newboard.get_legal_moves(current)
         #base case
         if depth == 0 or len(moves)==0:
@@ -40,9 +50,60 @@ class StudentEngine(Engine):
             return min(best_solution)
 
 
-    def _do_minimax(self, board, color):
+    def _do_alpha_beta_minimax(self, board, color):
         moves = board.get_legal_moves(color)
-        print moves
-        return max(moves, key=lambda move: self._get_cost(board, color, color*-1, move,self.DEPTH))
+        return max(moves, key=lambda move: self._get_ab_cost(board, color, color*-1, 
+            move,self.DEPTH,-100,100))#,float("-inf"),float("inf")))
+
+    def _get_ab_cost(self, board, color, current, move, depth, alpha, beta):
+        # Create a deepcopy of the board to preserve the state of the actual board
+        newboard = deepcopy(board)
+        print "------original---------"
+        newboard.display(time)
+        "-----------------------"
+        newboard.execute_move(move, -1)
+        print "------next_move--------"
+        newboard.display(time)
+        print "-----------------------"
+        moves = newboard.get_legal_moves(current)
+        #base case
+        print depth
+        if depth == 0 or len(moves) == 0:
+            # Return the difference in number of pieces
+            num_pieces_op = len(newboard.get_squares(color*-1))
+            num_pieces_me = len(newboard.get_squares(color))
+            return num_pieces_me
+        #recursive case
+
+        #maximizing agent
+        if color == current:
+            for move in moves:
+                value = self._get_ab_cost(newboard,color,current*-1,move,depth-1,alpha,beta)
+                print "-----max-----"
+                print alpha
+                print value
+                if value > alpha:
+                    alpha = value
+                print alpha
+                print "-----max-----"
+                if (beta <= alpha):
+                    print "pruned!"
+                    break
+            return alpha
+        #minimizing agent
+        else:
+            for move in moves:
+                value = self._get_ab_cost(newboard,color,current*-1,move,depth-1,alpha,beta)
+                print "-----min-----"
+                print beta
+                print value
+                if value < beta:
+                    beta = value
+                print beta
+                print "-----min-----"
+                if (beta <= alpha):
+                    print "pruned"
+                    break
+            return beta
 
 engine = StudentEngine
