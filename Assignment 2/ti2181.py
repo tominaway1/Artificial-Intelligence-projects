@@ -127,6 +127,7 @@ class StudentEngine(Engine):
                     return False
             return True
         return False
+
     def dominate_edge(self, newboard, move, color):
         #find out which edge and determine if there are any adjacent opponent pieces
         flag = True
@@ -191,13 +192,18 @@ class StudentEngine(Engine):
 
         newboard = deepcopy(board)
         newboard.execute_move(move, current)
-        moves = newboard.get_legal_moves(current)
-        
+
         ###base case###
-        if depth == 0 or len(moves) == 0:
+        if depth == 0 or self.total_board(newboard) == 64:
             return self.calculate_cost(newboard,color,current,move)
         
         ###recursive case###
+        moves = newboard.get_legal_moves(current)
+        if len(moves) == 0:
+            if len(newboard.get_legal_moves(current*-1)) == 0:
+                return self.calculate_cost(newboard,color,current,move)
+            else: 
+                return self._get_ab_cost(newboard, color, current*-1, move, depth, alpha, beta)
         #maximizing agent
         if color == current:
             for move in moves:
@@ -283,7 +289,6 @@ class StudentEngine(Engine):
             if len(newboard.get_squares(color*-1)) == 0:
                 return False
         return True
-
 
 
 engine = StudentEngine
