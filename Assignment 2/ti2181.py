@@ -163,7 +163,7 @@ class StudentEngine(Engine):
             return (False,False)
         newboard = deepcopy(board)
         newboard.execute_move(move, color)
-        boolean = self.dominate_edge(newboard,move,color)
+        boolean = self.dominate_edge(board,newboard,move,color)
         if boolean[0]:
             op_move = newboard.get_legal_moves(color*-1)
             for item in corners:
@@ -172,13 +172,17 @@ class StudentEngine(Engine):
             return (True,boolean[1])
         return (False,False)
 
-    def dominate_edge(self, newboard, move, color):
+    def dominate_edge(self, board, newboard, move, color):
         #find out which edge and determine if there are any adjacent opponent pieces
         danger = [2,6]
         #left hand side
         boolean = True
+        take_piece = False
         num = 0
         if move[0] == 0:
+            if newboard[0][0] == color and newboard[0][7] == color:
+                if move[1] == 1 or move[1] == 6:
+                    return (True,True)
             # if move[1] in danger:
             #     count = 0
             #     for i in range(7):
@@ -193,14 +197,20 @@ class StudentEngine(Engine):
                     boolean = False
                     if (newboard[0][i-1] == color) or (newboard[0][i+1] == color):
                         return (False, boolean)
-
                 if newboard[0][i] == 0:
                     if (newboard[0][i-1] == color) and (newboard[0][i+1] == color):
                         return (False, boolean)
-            return (True,boolean and num > 1)
+                if newboard[0][i] == color and board[0][i] == -1 * color:
+                    take_piece = True 
+            if take_piece:
+                return (True,True)
+            return (True,False)
 
         #right hand side
         if move[0] == 7:
+            if newboard[7][0] == color and newboard[7][7] == color:
+                if move[1] == 1 or move[1] == 6:
+                    return (True,True)
             for i in range(7):
                 if newboard[7][i] != 0:
                     num += 1
@@ -213,10 +223,17 @@ class StudentEngine(Engine):
                 if newboard[7][i] == 0:
                     if (newboard[7][i-1] == color) and (newboard[7][i+1] == color):
                         return (False, boolean)
-            return (True,boolean and num > 1)
+                if newboard[7][i] == color and board[7][i] == -1 * color:
+                    take_piece = True
+            if take_piece:
+                return (True,True)
+            return (True,False)
         
         #top
         if move[1] == 0:
+            if newboard[0][0] == color and newboard[7][0] == color:
+                if move[0] == 1 or move[0] == 6:
+                    return (True,True)
             for i in range(7):
                 if newboard[i][0] != 0:
                     num += 1
@@ -227,10 +244,18 @@ class StudentEngine(Engine):
                 if newboard[i][0] == 0:
                     if (newboard[i-1][0] == color) and (newboard[i+1][0] == color):
                         return (False, boolean)
-            return (True,boolean and num > 1)
+                if newboard[i][0] == color and board[i][0] == -1 * color:
+                    take_piece = True 
+                    print "Got here"
+            if take_piece:
+                return (True,True)
+            return (True,False)
 
         #bottom
         if move[1] == 7:
+            if newboard[0][7] == color and newboard[7][7] == color:
+                if move[0] == 1 or move[0] == 6:
+                    return (True,True)
             for i in range(7):
                 if newboard[i][7] != 0:
                     num += 1
@@ -241,7 +266,11 @@ class StudentEngine(Engine):
                 if newboard[i][7] == 0:
                     if (newboard[i-1][7] == color) and (newboard[i+1][7] == color):
                         return (False, boolean)
-            return (True,boolean and num > 1)
+                if newboard[i][7] == color and board[i][7] == -1 * color:
+                    take_piece = True 
+            if take_piece:
+                return (True,True)
+            return (True,False)
         #should never reach here
         return False
 
