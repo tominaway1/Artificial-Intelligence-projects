@@ -127,7 +127,7 @@ class StudentEngine(Engine):
     def _do_alpha_beta_minimax(self, board, color):
         moves = board.get_legal_moves(color)
         self.beginning = True
-        if self.total_board(board) > 40:
+        if self.total_board(board) > 20:
             self.beginning = False
         if self.beginning:
             temp = self.beginning_phase(moves,board,color)
