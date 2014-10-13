@@ -56,11 +56,17 @@ class StudentEngine(Engine):
         self.alpha_beta = False
         self.DEPTH = 5
         self.beginning = True
+        self.number_of_nodes = []
+        self.number = 0
+
     def get_move(self, board, color, move_num=None,
                  time_remaining=None, time_opponent=None):
+        #set counter for nodes
+        self.number = 0
+
         time[color] = time_remaining
         time[color * -1] = time_opponent  
-        board.display(time)
+        # board.display(time)
         if time_remaining < 30:
             self.DEPTH = 4
         if time_remaining < 10:
@@ -77,6 +83,8 @@ class StudentEngine(Engine):
             answer = self._do_alpha_beta_minimax1(board,color)
 
         print "The best move is {0}".format(answer)
+        self.number_of_nodes.append(self.number)
+        print self.number_of_nodes
         return answer
 
     def _do_minimax(self, board, color):
@@ -249,6 +257,7 @@ class StudentEngine(Engine):
             return False
 
     def _get_ab_cost(self, e, board, color, current, move, depth, alpha, beta):
+        self.number += 1
         if move in corners:
             return float("inf")
 
@@ -330,7 +339,6 @@ class StudentEngine(Engine):
             if temp > best:
                 best = temp
                 best_move = item
-        print best
         if not best_move:
             self.beginning = False
         else:
