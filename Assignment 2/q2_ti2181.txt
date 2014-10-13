@@ -1,0 +1,3 @@
+Against Greedy:
+The number of nodes generated: 11293
+
