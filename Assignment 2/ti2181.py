@@ -135,15 +135,23 @@ class StudentEngine(Engine):
                 return temp
         arr = []
         arr1 = []
+        arr2 = []
         for move in moves:
             if move in corners:
                 arr.append(move)
-            if self.prelim_check(move, board, color):
-                arr.append(move)
+            boolean = self.prelim_check(move, board, color)
+            if boolean[0]:
+                if boolean[1]:
+                    arr.append(move)
+                else:
+                    arr2.append(move)
             if mid[move[0]][move[1]] == 1:
                 arr1.append(move)
         if arr:
             return max(arr, key=lambda move: self._get_ab_cost(True,board, color, color, 
+            move,self.DEPTH,float("-inf"),float("inf")))
+        elif arr2:
+            return max(arr2, key=lambda move: self._get_ab_cost(True,board, color, color, 
             move,self.DEPTH,float("-inf"),float("inf")))
         else:
             if not arr1:
@@ -152,21 +160,24 @@ class StudentEngine(Engine):
    
     def prelim_check(self, move, board, color):
         if not self.on_edge(move):
-            return False
+            return (False,False)
         newboard = deepcopy(board)
         newboard.execute_move(move, color)
-        if self.dominate_edge(newboard,move,color):
+        boolean = self.dominate_edge(newboard,move,color)
+        if boolean[0]:
             op_move = newboard.get_legal_moves(color*-1)
             for item in corners:
                 if item in op_move:
-                    return False
-            return True
-        return False
+                    return (False,False)
+            return (True,boolean[1])
+        return (False,False)
 
     def dominate_edge(self, newboard, move, color):
         #find out which edge and determine if there are any adjacent opponent pieces
         danger = [2,6]
         #left hand side
+        boolean = True
+        num = 0
         if move[0] == 0:
             # if move[1] in danger:
             #     count = 0
@@ -176,68 +187,61 @@ class StudentEngine(Engine):
             #         if count > 1:
             #             return False
             for i in range(7):
+                if newboard[0][i] != 0:
+                    num += 1
                 if newboard[0][i] == -1 * color:
+                    boolean = False
                     if (newboard[0][i-1] == color) or (newboard[0][i+1] == color):
-                        return False
+                        return (False, boolean)
+
                 if newboard[0][i] == 0:
                     if (newboard[0][i-1] == color) and (newboard[0][i+1] == color):
-                        return False
-            return True
+                        return (False, boolean)
+            return (True,boolean and num > 1)
 
         #right hand side
         if move[0] == 7:
-            # if move[1] in danger:
-            #     count = 0
-            #     for i in range(7):
-            #         if newboard[7][i] != 0:
-            #             count +=1
-            #         if count > 1:
-            #             return False
             for i in range(7):
+                if newboard[7][i] != 0:
+                    num += 1
                 if newboard[7][i] == -1 * color:
-                    if (newboard[7][i-1] == color) or (newboard[7][i+1] == color):
-                        return False
+                    boolean = False
+                    if (newboard[7][i-1] == color) or (newboard[7][i+1] == color):                        
+                        if move[1] == i-1 or move[1] == i+1:
+                            return (False, boolean)
+
                 if newboard[7][i] == 0:
                     if (newboard[7][i-1] == color) and (newboard[7][i+1] == color):
-                        return False
-            return True
+                        return (False, boolean)
+            return (True,boolean and num > 1)
         
         #top
         if move[1] == 0:
-            # if move[0] in danger:
-            #     count = 0
-            #     for i in range(7):
-            #         if newboard[i][0] != 0:
-            #             count +=1
-            #         if count > 1:
-            #             return False
             for i in range(7):
+                if newboard[i][0] != 0:
+                    num += 1
                 if newboard[i][0] == -1 * color:
-                    if (newboard[i-1][0] == color) or (newboard[i+1][0] == color):
-                        return False
+                    boolean = False
+                    if (newboard[i-1][0] == color) or (newboard[i+1][0] == color):                       
+                        return (False, boolean)
                 if newboard[i][0] == 0:
                     if (newboard[i-1][0] == color) and (newboard[i+1][0] == color):
-                        return False
-            return True
+                        return (False, boolean)
+            return (True,boolean and num > 1)
 
         #bottom
         if move[1] == 7:
-            # if move[0] in danger:
-            #     count = 0
-            #     for i in range(7):
-            #         if newboard[i][7] != 0:
-            #             count +=1
-            #         if count > 1:
-            #             return False
             for i in range(7):
+                if newboard[i][7] != 0:
+                    num += 1
                 if newboard[i][7] == -1 * color:
+                    boolean = False
                     if (newboard[i-1][7] == color) or (newboard[i+1][7] == color):
-                        return False
+                        return (False, boolean)                 
                 if newboard[i][7] == 0:
                     if (newboard[i-1][7] == color) and (newboard[i+1][7] == color):
-                        return False
-            return True
-
+                        return (False, boolean)
+            return (True,boolean and num > 1)
         #should never reach here
         return False
 
