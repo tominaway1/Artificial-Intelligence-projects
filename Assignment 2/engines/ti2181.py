@@ -1,8 +1,9 @@
 from engines import Engine
 from copy import deepcopy
+import time
 
 #set values
-time = { -1 : 0, 1 : 0 }
+timed = { -1 : 0, 1 : 0 }
 corners = [(0,0),(0,7),(7,0),(7,7)]
 
 disk_square_table=[
@@ -27,17 +28,6 @@ endgame=[
    [ 30, -1000, 10, 5, 5, 10, -1000,  30],
 ]
 
-# beginning=[
-#    [ 1, -1,-1, -1, -1, -1, -1,  1],
-#    [ -1, -1,-1, -1, -1, -1, -1,-1],
-#    [ -1, -1,1, 1, 1, 1, -1, -1],
-#    [ -1, -1,1, 1, 1, 1, -1, -1],
-#    [ -1, -1,1, 1, 1, 1, -1, -1],
-#    [ -1, -1,1, 1, 1, 1, -1, -1],
-#    [ -1, -1,-1, -1, -1, -1, -1,-1],
-#    [ 1, -1,-1, -1, -1, -1, -1,  1],
-# ]
-
 mid=[
     [  1, -1, 1, 1, 1,  1, -1, 1],
     [ -1, -1, 1, 1, 1,  1, -1,-1],
@@ -49,17 +39,38 @@ mid=[
     [  1, -1, 1, 1, 1,  1, -1, 1],
 ]
 
+beginning=[
+   [ 1, -1,-1, -1, -1, -1, -1,  1],
+   [ -1, -1,-1, -1, -1, -1, -1,-1],
+   [ -1, -1,1, 1, 1, 1, -1, -1],
+   [ -1, -1,1, 1, 1, 1, -1, -1],
+   [ -1, -1,1, 1, 1, 1, -1, -1],
+   [ -1, -1,1, 1, 1, 1, -1, -1],
+   [ -1, -1,-1, -1, -1, -1, -1,-1],
+   [ 1, -1,-1, -1, -1, -1, -1,  1],
+]
+
 class StudentEngine(Engine):
     """ Game engine that implements a simple fitness function maximizing the
     difference in number of pieces in the given color's favor. """
     def __init__(self):
         self.alpha_beta = False
         self.DEPTH = 4
+        self.node = 0
+        self.duplicate = {}
+        self.branching_factor = 0
+        self.times = []
         self.beginning = True
+
     def get_move(self, board, color, move_num=None,
                  time_remaining=None, time_opponent=None):
-        time[color] = time_remaining
-        time[color * -1] = time_opponent  
+        timed[color] = time_remaining
+        timed[color * -1] = time_opponent 
+        board.display(timed)
+        start = time.time()
+
+
+        # beginning = time_remaining
         if time_remaining < 30:
             self.DEPTH = 4
         if time_remaining < 10:
@@ -76,6 +87,12 @@ class StudentEngine(Engine):
             answer = self._do_alpha_beta_minimax1(board,color)
 
         # print "The best move is {0}".format(answer)
+        # print self.node
+        # print self.count(self.duplicate)
+        # print self.branching_factor
+        #print float(self.branching_factor)/float(self.node)
+        # print self.times
+        self.times.append(time.time()-start)
         return answer
 
     def _do_minimax(self, board, color):
@@ -125,6 +142,9 @@ class StudentEngine(Engine):
 
     def _do_alpha_beta_minimax(self, board, color):
         moves = board.get_legal_moves(color)
+        self.branching_factor += len(moves)
+        
+        #beginning steps
         self.beginning = True
         if self.total_board(board) > 10 or color == -1 or True:
             self.beginning = False
@@ -132,6 +152,7 @@ class StudentEngine(Engine):
             temp = self.beginning_phase(moves,board,color)
             if self.beginning:
                 return temp
+                
         arr = []
         arr1 = []
         arr2 = []
@@ -281,6 +302,14 @@ class StudentEngine(Engine):
             return False
 
     def _get_ab_cost(self, e, board, color, current, move, depth, alpha, beta):
+        #stats
+        self.node += 1
+        str_rep = self.stringrep(board) 
+        if str_rep in self.duplicate:
+            self.duplicate[str_rep] += 1
+        else:
+            self.duplicate[str_rep] = 0
+
         if move in corners:
             return float("inf")
 
@@ -293,6 +322,9 @@ class StudentEngine(Engine):
         
         ###recursive case###
         moves = newboard.get_legal_moves(current)
+        
+        #stats
+        self.branching_factor += len(moves)
 
         #check to see if you cannot make any more moves
         if len(moves) == 0:
@@ -345,6 +377,28 @@ class StudentEngine(Engine):
     def total_board(self, board):
         return len(board.get_squares(-1))+len(board.get_squares(1))    
 
+    def check_move(self, board, color):
+        moves = board.get_legal_moves(color)
+        for move in moves:
+            newboard = deepcopy(board)
+            newboard.execute_move(move,color)
+            if len(newboard.get_squares(color*-1)) == 0:
+                return False
+        return True
+    def count(self,dictionary):
+        count = 0
+        for item in dictionary:
+            if dictionary[item] > 0:
+                count += 1
+        return count
+    #create string representation of dictionary
+    def stringrep(self,board):
+        ans=''
+        for i in range(0,7):
+            for j in range(0,7):
+                ans += str(board[i][j])
+        return ans
+
     #handle beginning of the game
     def beginning_phase(self, moves,board,color):
         arr=[]
@@ -375,74 +429,6 @@ class StudentEngine(Engine):
         if not self.check_move(newboard,color*-1):
             return float("-inf")
         else:
-            return len(newboard.get_squares(color*-1)) - len(newboard.get_squares(color)) 
-
-    def check_move(self, board, color):
-        moves = board.get_legal_moves(color)
-        for move in moves:
-            newboard = deepcopy(board)
-            newboard.execute_move(move,color)
-            if len(newboard.get_squares(color*-1)) == 0:
-                return False
-        return True
-
-
-
-
-######################################################################################################################################################
-
-    #test case    
-    def _do_alpha_beta_minimax1(self, board, color):
-        moves = board.get_legal_moves(color)
-        for move in moves:
-            if move in corners:
-                return move
-        return max(moves, key=lambda move: self._get_ab_cost1(board, color, color, move,4,float("-inf"),float("inf")))
-    
-
-    def _get_ab_cost1(self, board, color, current, move, depth, alpha, beta):
-        if move in corners:
-            return float("inf")
-
-        newboard = deepcopy(board)
-        newboard.execute_move(move, current)
-
-        ###base case###
-        if depth == 0 or self.total_board(newboard) == 64:
-            return self._get_cost(newboard,color,current,move,depth)
-        
-        ###recursive case###
-        moves = newboard.get_legal_moves(current)
-
-        #check to see if you cannot make any more moves
-        if len(moves) == 0:
-            if len(newboard.get_legal_moves(current*-1)) == 0:
-                return self._get_cost(newboard,color,current,move,depth)
-            else: 
-                return self._get_ab_cost1(newboard, color, current*-1, move, depth, alpha, beta)
-        #maximizing agent
-        if color == current:
-            for move in moves:
-                value = self._get_ab_cost1(newboard,color,current*-1,move,depth-1,alpha,beta)
-                if value > alpha:
-                    alpha = value
-                if (beta <= alpha):
-                    break
-            return alpha
-
-        #minimizing agent
-        else:
-            for move in moves:
-                value = self._get_ab_cost1(newboard,color,current*-1,move,depth-1,alpha,beta)
-                if value < beta:
-                    beta = value
-                if (beta <= alpha):
-                    break
-            return beta
-
-######################################################################################################################################################
-
-#ha
-
+            return len(newboard.get_squares(color * -1)) - len(newboard.get_squares(color)) 
 
 engine = StudentEngine

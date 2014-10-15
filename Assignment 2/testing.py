@@ -3,6 +3,9 @@ from board import Board, move_string, print_moves
 
 player = {-1 : "Black", 1 : "White"}
 
+game_time = 60
+
+time = { -1 : game_time, 1 : game_time }
 
 def game(white_engine, black_engine, game_time=300.0, verbose=False):
     """ Run a single game. Raise RuntimeError in the event of time expiration.
@@ -170,6 +173,9 @@ if __name__ == '__main__':
                 wins += 1
             elif winner(board)[0] == 1:
                 losses += 1
+                board.display(time)
+                print "you lost {1}-{0}".format(winner(board)[1],winner(board)[2])
+                print "PENISSSSSSSSSSSSSSSSSSSS"
             else: 
                 ties += 1
 
@@ -187,10 +193,13 @@ if __name__ == '__main__':
             trials +=1
             print trials
             board = game(engine_b, engine_w, 60, False)
-            if winner(board)[0] == -1:
+            if winner(board)[0] == 1:
                 wins += 1
-            elif winner(board)[0] == 1:
+            elif winner(board)[0] == -1:
                 losses += 1
+                board.display(time)
+                print "you lost {1}-{0}".format(winner(board)[1],winner(board)[2])
+                print "PENISSSSSSSSSSSSSSSSSSSS"
             else:
                 ties += 1
             
