@@ -8,7 +8,7 @@ board. Of course, this is only after the first few turns that I implement the ev
 	However, the key implementation of my AI is how I handle edges. In my simulations of the game, I
 realized I always aim to dominate the edges. This strategy gives me a huge advantage over the end game. 
 The only danger is that it makes the corners a very important part of my game. I am very cautious about
-leaving the corner squares vulnerable and actually made it so it is always the last option. This method
+leaving the corner squares vulnerable and actually made it so i almost never leave it vlunerable. This method
 however heavily increased the efficiency of the program. Before min-max, I always run a check to see if 
 there are any pieces on the edges of the board that will not be vulnerable the next turn. If there are, I
 run a min-max on all those moves. Otherwise, I would run min-max on all the moves that are not adjacent

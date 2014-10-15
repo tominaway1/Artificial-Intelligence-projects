@@ -45,8 +45,8 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
             # No more legal moves. Game is over.
             break
 
-    print "FINAL BOARD\n--\n"
-    board.display(time)
+    # print "FINAL BOARD\n--\n"
+    # board.display(time)
 
     return board
 
@@ -147,7 +147,7 @@ if __name__ == '__main__':
     try:
         engines_b = __import__('engines.' + black_engine)
         engines_w = __import__('engines.' + white_engine)
-	engine_b = engines_b.__dict__[black_engine].__dict__['engine']()
+        engine_b = engines_b.__dict__[black_engine].__dict__['engine']()
         engine_w = engines_w.__dict__[white_engine].__dict__['engine']()
         
 	if (args.aB and black_engine != "greedy" and black_engine != "human" and black_engine != "random"):
@@ -155,9 +155,48 @@ if __name__ == '__main__':
 	if (args.aW and white_engine != "greedy" and white_engine != "human" and white_engine != "random"):
             engine_w.alpha_beta = True
 	v = (args.v or white_engine == "human" or black_engine == "human")
-        # Play game
-	print player[-1] + " vs. " + player[1] + "\n"
-        main(engine_w, engine_b, game_time=args.t, verbose=v)
+       
+	# print player[-1] + " vs. " + player[1] + "\n"
+        trials = 0
+        wins = 0
+        losses = 0
+        ties = 0
+
+        while trials < 100:
+            trials +=1
+            print trials
+            board = game(engine_w, engine_b, 60, False)
+            if winner(board)[0] == -1:
+                wins += 1
+            elif winner(board)[0] == 1:
+                losses += 1
+            else: 
+                ties += 1
+
+        print "White({3}) won {0} many times, lost {1} times and tied {2} many times".format(wins,losses,ties,black_engine)
+        print "Whites percentage of wins was {0}%".format(float(wins)/float(trials))
+
+        print "----------------Now switching----------------"
+
+
+        trials = 0
+        wins = 0
+        losses = 0
+        ties = 0
+        while trials < 100:
+            trials +=1
+            print trials
+            board = game(engine_b, engine_w, 60, False)
+            if winner(board)[0] == -1:
+                wins += 1
+            elif winner(board)[0] == 1:
+                losses += 1
+            else:
+                ties += 1
+            
+        print "White({3}) won {0} many times, lost {1} times and tied {2} many times".format(wins,losses,ties,white_engine)
+        print "Whites percentage of wins was {0}%".format(float(wins)/float(trials))
+
 
     except ImportError, e:
         print 'Unknown engine -- ' + e[0].split()[-1]

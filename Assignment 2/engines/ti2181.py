@@ -6,14 +6,14 @@ time = { -1 : 0, 1 : 0 }
 corners = [(0,0),(0,7),(7,0),(7,7)]
 
 disk_square_table=[
-   [ 30, -25, 10, 5, 5, 10, -25,  30],
-   [-25, -25,  1, 1, 1,  1, -25, -25],
-   [ 10,   1,  5, 2, 2,  5,   1,  10],
+   [ 120, -20, 20, 5, 5, 20, -20,  120],
+   [-20, -40,  1, 1, 1,  1, -40, -25],
+   [ 10,   1,  5, 2, 2,  5,   1,  20],
    [  5,   1,  2, 1, 1,  2,   1,   5],
    [  5,   1,  2, 1, 1,  2,   1,   5],
-   [ 10,   1,  5, 2, 2,  5,   1,  10],
-   [-25, -25,  1, 1, 1,  1, -25, -25],
-   [ 30, -25, 10, 5, 5, 10, -25,  30],
+   [ 10,   1,  5, 2, 2,  5,   1,  20],
+   [-20, -40,  1, 1, 1,  1, -40, -20],
+   [ 120, -20, 20, 5, 5, 20, -20,  120],
 ]
 
 endgame=[
@@ -27,16 +27,16 @@ endgame=[
    [ 30, -1000, 10, 5, 5, 10, -1000,  30],
 ]
 
-beginning=[
-   [ 1, -1,-1, -1, -1, -1, -1,  1],
-   [ -1, -1,-1, -1, -1, -1, -1,-1],
-   [ -1, -1,1, 1, 1, 1, -1, -1],
-   [ -1, -1,1, 1, 1, 1, -1, -1],
-   [ -1, -1,1, 1, 1, 1, -1, -1],
-   [ -1, -1,1, 1, 1, 1, -1, -1],
-   [ -1, -1,-1, -1, -1, -1, -1,-1],
-   [ 1, -1,-1, -1, -1, -1, -1,  1],
-]
+# beginning=[
+#    [ 1, -1,-1, -1, -1, -1, -1,  1],
+#    [ -1, -1,-1, -1, -1, -1, -1,-1],
+#    [ -1, -1,1, 1, 1, 1, -1, -1],
+#    [ -1, -1,1, 1, 1, 1, -1, -1],
+#    [ -1, -1,1, 1, 1, 1, -1, -1],
+#    [ -1, -1,1, 1, 1, 1, -1, -1],
+#    [ -1, -1,-1, -1, -1, -1, -1,-1],
+#    [ 1, -1,-1, -1, -1, -1, -1,  1],
+# ]
 
 mid=[
     [  1, -1, 1, 1, 1,  1, -1, 1],
@@ -60,7 +60,6 @@ class StudentEngine(Engine):
                  time_remaining=None, time_opponent=None):
         time[color] = time_remaining
         time[color * -1] = time_opponent  
-        board.display(time)
         if time_remaining < 30:
             self.DEPTH = 4
         if time_remaining < 10:
@@ -76,7 +75,7 @@ class StudentEngine(Engine):
             # answer = self._do_minimax(board,color)
             answer = self._do_alpha_beta_minimax1(board,color)
 
-        print "The best move is {0}".format(answer)
+        # print "The best move is {0}".format(answer)
         return answer
 
     def _do_minimax(self, board, color):
@@ -84,7 +83,7 @@ class StudentEngine(Engine):
         for move in moves:
             if move in corners:
                 return move
-        print moves
+        # print moves
         return max(moves, key=lambda move: self._get_cost(board, color, color, move,self.DEPTH))
 
     def _get_cost(self, board, color, current, move, depth):
@@ -127,7 +126,7 @@ class StudentEngine(Engine):
     def _do_alpha_beta_minimax(self, board, color):
         moves = board.get_legal_moves(color)
         self.beginning = True
-        if self.total_board(board) > 20:
+        if self.total_board(board) > 10 or color == -1 or True:
             self.beginning = False
         if self.beginning:
             temp = self.beginning_phase(moves,board,color)
@@ -246,7 +245,7 @@ class StudentEngine(Engine):
                         return (False, boolean)
                 if newboard[i][0] == color and board[i][0] == -1 * color:
                     take_piece = True 
-                    print "Got here"
+                    # print "Got here"
             if take_piece:
                 return (True,True)
             return (True,False)
@@ -363,7 +362,7 @@ class StudentEngine(Engine):
             if temp > best:
                 best = temp
                 best_move = item
-        print best
+        # print best
         if not best_move:
             self.beginning = False
         else:
@@ -386,10 +385,6 @@ class StudentEngine(Engine):
             if len(newboard.get_squares(color*-1)) == 0:
                 return False
         return True
-
-
-
-
 
 
 
@@ -447,6 +442,7 @@ class StudentEngine(Engine):
 
 ######################################################################################################################################################
 
+#ha
 
 
 engine = StudentEngine
