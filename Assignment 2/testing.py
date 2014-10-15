@@ -174,37 +174,14 @@ if __name__ == '__main__':
             elif winner(board)[0] == 1:
                 losses += 1
                 board.display(time)
-                print "you lost {1}-{0}".format(winner(board)[1],winner(board)[2])
-                print "PENISSSSSSSSSSSSSSSSSSSS"
+                print "you lost {0}-{1}".format(winner(board)[1],winner(board)[2])
+                print "PENIS"
             else: 
                 ties += 1
 
         print "White({3}) won {0} many times, lost {1} times and tied {2} many times".format(wins,losses,ties,black_engine)
         print "Whites percentage of wins was {0}%".format(float(wins)/float(trials))
 
-        print "----------------Now switching----------------"
-
-
-        trials = 0
-        wins = 0
-        losses = 0
-        ties = 0
-        while trials < 100:
-            trials +=1
-            print trials
-            board = game(engine_b, engine_w, 60, False)
-            if winner(board)[0] == 1:
-                wins += 1
-            elif winner(board)[0] == -1:
-                losses += 1
-                board.display(time)
-                print "you lost {1}-{0}".format(winner(board)[1],winner(board)[2])
-                print "PENISSSSSSSSSSSSSSSSSSSS"
-            else:
-                ties += 1
-            
-        print "White({3}) won {0} many times, lost {1} times and tied {2} many times".format(wins,losses,ties,white_engine)
-        print "Whites percentage of wins was {0}%".format(float(wins)/float(trials))
 
 
     except ImportError, e:
