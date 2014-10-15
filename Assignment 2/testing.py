@@ -11,7 +11,7 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
     """ Run a single game. Raise RuntimeError in the event of time expiration.
     Raise LookupError in the case of a bad move. The tournament engine must
     handle these exceptions. """
-
+    temp =[]
     # Initialize variables
     board = Board()
     time = { -1 : game_time, 1 : game_time }
@@ -38,6 +38,7 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
             if move is not None:
                 board.execute_move(move, color)
                 moves.append(move)
+                temp.append(copy.deepcopy(board))
 
                 if verbose:
                     print "--\n"
@@ -51,7 +52,7 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
     # print "FINAL BOARD\n--\n"
     # board.display(time)
 
-    return board
+    return board, temp
 
 def winner(board):
     """ Determine the winner of a given board. Return the points of the two 
@@ -165,17 +166,23 @@ if __name__ == '__main__':
         losses = 0
         ties = 0
 
+        if black_engine =="ti2181":
+            c = -1
+        else:
+            c = 1
         while trials < 100:
             trials +=1
             print trials
-            board = game(engine_w, engine_b, 60, False)
-            if winner(board)[0] == -1:
+            board, arr = game(engine_w, engine_b, 60, False)
+            if winner(board)[0] == c:
                 wins += 1
-            elif winner(board)[0] == 1:
+                
+            elif winner(board)[0] == -1 * c:
                 losses += 1
-                board.display(time)
                 print "you lost {0}-{1}".format(winner(board)[1],winner(board)[2])
                 print "PENIS"
+                for item in arr:
+                    item.display(time)
             else: 
                 ties += 1
 

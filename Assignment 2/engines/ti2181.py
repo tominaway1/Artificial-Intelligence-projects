@@ -19,7 +19,7 @@ class StudentEngine(Engine):
         self.duplicate = {}
         self.branching_factor = 0
         self.times = []
-        self.beginning = True
+        self.beginningq = True
         self.disk_square_table=[
            [ 120, -20, 20, 5, 5, 20, -20,  120],
            [-20, -40000000,  1, 1, 1,  1, -40000000, -25],
@@ -67,6 +67,8 @@ class StudentEngine(Engine):
                  time_remaining=None, time_opponent=None):
         timed[color] = time_remaining
         timed[color * -1] = time_opponent 
+        if self.bog(board,color):
+            self.reset()
         start = time.time()
 
 
@@ -99,8 +101,7 @@ class StudentEngine(Engine):
                 self.disk_square_table[index[0]][index[1]] = 100
                 self.endgame[index[0]][index[1]] = 100
                 self.mid[index[0]][index[1]] = 1
-            print self.mid
-        board.display(timed)
+        # board.display(timed)
         return answer
 
     def _do_minimax(self, board, color):
@@ -153,13 +154,13 @@ class StudentEngine(Engine):
         self.branching_factor += len(moves)
         
         #beginning steps
-        self.beginning = True
-        if self.total_board(board) > 10 or color == -1:
-            self.beginning = False
-        if self.beginning:
-            temp = self.beginning_phase(moves,board,color)
-            if self.beginning:
-                return temp
+        self.beginningq = True
+        if self.total_board(board) > 20:
+            self.beginningq = False
+        # if self.beginningq:
+        #     temp = self.beginning_phase(moves,board,color)
+        #     if self.beginningq:
+        #         return temp
                 
         arr = []
         arr1 = []
@@ -428,7 +429,7 @@ class StudentEngine(Engine):
                 best_move = item
         # print best
         if not best_move:
-            self.beginning = False
+            self.beginningq = False
         else:
             return best_move
 
@@ -440,5 +441,61 @@ class StudentEngine(Engine):
             return float("-inf")
         else:
             return len(newboard.get_squares(color * -1)) - len(newboard.get_squares(color)) 
+
+    def bog(self,board,color):
+        if color == -1:
+            return self.total_board(board) == 4
+        else:
+            return self.total_board(board) == 5
+
+
+
+    def reset(self):
+        self.depth = 4
+        self.beginningq = True
+        self.disk_square_table=[
+           [ 120, -20, 20, 5, 5, 20, -20,  120],
+           [-20, -40000000,  1, 1, 1,  1, -40000000, -25],
+           [ 10,   1,  5, 2, 2,  5,   1,  20],
+           [  5,   1,  2, 1, 1,  2,   1,   5],
+           [  5,   1,  2, 1, 1,  2,   1,   5],
+           [ 10,   1,  5, 2, 2,  5,   1,  20],
+           [-20, -40000000,  1, 1, 1,  1, -40000000, -20],
+           [ 120, -20, 20, 5, 5, 20, -20,  120],
+        ]
+        self.endgame=[
+           [ 30, -1000, 10, 5, 5, 10, -1000,  30],
+           [-1000, -25,  1, 1, 1,  1, -25, -25],
+           [ 10,   1,  5, 2, 2,  5,   1,  10],
+           [  5,   1,  2, 1, 1,  2,   1,   5],
+           [  5,   1,  2, 1, 1,  2,   1,   5],
+           [ 10,   1,  5, 2, 2,  5,   1,  10],
+           [-1000, -25,  1, 1, 1,  1, -25, -1000],
+           [ 30, -1000, 10, 5, 5, 10, -1000,  30],
+        ]
+
+        self.mid=[
+            [  1, -1, 1, 1, 1,  1, -1, 1],
+            [ -1, -1, 1, 1, 1,  1, -1,-1],
+            [  1,  1, 1, 1, 1,  1,  1, 1],
+            [  1,  1, 1, 1, 1,  1,  1, 1],
+            [  1,  1, 1, 1, 1,  1,  1, 1],
+            [  1,  1, 1, 1, 1,  1,  1, 1],
+            [ -1, -1, 1, 1, 1,  1, -1,-1],
+            [  1, -1, 1, 1, 1,  1, -1, 1],
+        ]
+
+        self.beginning=[
+           [ 1, -1,-1, -1, -1, -1, -1,  1],
+           [ -1, -1,-1, -1, -1, -1, -1,-1],
+           [ -1, -1,1, 1, 1, 1, -1, -1],
+           [ -1, -1,1, 1, 1, 1, -1, -1],
+           [ -1, -1,1, 1, 1, 1, -1, -1],
+           [ -1, -1,1, 1, 1, 1, -1, -1],
+           [ -1, -1,-1, -1, -1, -1, -1,-1],
+           [ 1, -1,-1, -1, -1, -1, -1,  1],
+        ]
+        print "poop"
+
 
 engine = StudentEngine
