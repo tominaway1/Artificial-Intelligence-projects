@@ -1,17 +1,13 @@
-import argparse, copy, signal, sys, timeit, imp
+import argparse, copy, signal, sys, timeit, imp, traceback
 from board import Board, move_string, print_moves
 
 player = {-1 : "Black", 1 : "White"}
-
-game_time = 60
-
-time = { -1 : game_time, 1 : game_time }
 
 def game(white_engine, black_engine, game_time=300.0, verbose=False):
     """ Run a single game. Raise RuntimeError in the event of time expiration.
     Raise LookupError in the case of a bad move. The tournament engine must
     handle these exceptions. """
-    temp =[]
+
     # Initialize variables
     board = Board()
     time = { -1 : game_time, 1 : game_time }
@@ -38,7 +34,6 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
             if move is not None:
                 board.execute_move(move, color)
                 moves.append(move)
-                temp.append(copy.deepcopy(board))
 
                 if verbose:
                     print "--\n"
@@ -49,10 +44,10 @@ def game(white_engine, black_engine, game_time=300.0, verbose=False):
             # No more legal moves. Game is over.
             break
 
-    # print "FINAL BOARD\n--\n"
-    # board.display(time)
+    print "FINAL BOARD\n--\n"
+    board.display(time)
 
-    return board, temp
+    return board
 
 def winner(board):
     """ Determine the winner of a given board. Return the points of the two 
@@ -60,8 +55,12 @@ def winner(board):
     black_count = board.count(-1)
     white_count = board.count(1)
     if black_count > white_count:
+	if black_count + white_count != 64:
+		black_count += (64 - black_count - white_count)
         return (-1, black_count, white_count)
     elif white_count > black_count:
+	if black_count + white_count != 64:
+		white_count += (64 - black_count - white_count)
         return (1, black_count, white_count)
     else:
         return (0, black_count, white_count)
@@ -77,7 +76,11 @@ def get_move(board, engine, color, move_num, time, **kwargs):
     elif len(legal_moves) == 1:
         return legal_moves[0]
     else:
-        move = engine.get_move(copy.deepcopy(board), color, move_num, time[color], time[-color])
+	try:
+            move = engine.get_move(copy.deepcopy(board), color, move_num, time[color], time[-color])
+	except Exception, e:
+	    print traceback.format_exc()
+	    raise SystemError(color)
 
         if move not in legal_moves:
             raise LookupError(color)
@@ -127,6 +130,17 @@ def main(white_engine, black_engine, game_time, verbose):
             print "\n- " + player[1] + " made an illegal move!"
             print player[-1] + " wins the game! (64-0)"
 	    return (-1, 64, 0)
+	
+    except SystemError, e:
+	if e[0] == -1:
+            print "\n- " + player[-1] + " ended prematurely because of an error!"
+            print player[1] + " wins the game! (64-0)"
+            return (1, 0, 64)
+        else:
+            print "\n- " + player[1] + " ended prematurely because of an error!"
+            print player[-1] + " wins the game! (64-0)"
+            return (-1, 64, 0)
+
 
 if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
@@ -151,7 +165,7 @@ if __name__ == '__main__':
     try:
         engines_b = __import__('engines.' + black_engine)
         engines_w = __import__('engines.' + white_engine)
-        engine_b = engines_b.__dict__[black_engine].__dict__['engine']()
+	engine_b = engines_b.__dict__[black_engine].__dict__['engine']()
         engine_w = engines_w.__dict__[white_engine].__dict__['engine']()
         
 	if (args.aB and black_engine != "greedy" and black_engine != "human" and black_engine != "random"):
@@ -159,80 +173,9 @@ if __name__ == '__main__':
 	if (args.aW and white_engine != "greedy" and white_engine != "human" and white_engine != "random"):
             engine_w.alpha_beta = True
 	v = (args.v or white_engine == "human" or black_engine == "human")
-       
-	# print player[-1] + " vs. " + player[1] + "\n"
-        trials = 0
-        wins = 0
-        losses = 0
-        ties = 0
-
-        # depth = 4
-        # print "for white alpha_beta"
-        # while depth >=0:
-        #     print depth
-        #     engines_b = __import__('engines.ti2181')
-        #     engines_w = __import__('engines.greedy')
-        #     engines_b.alpha_beta = True
-        #     engines_b.depth = depth
-        #     game(engine_w, engine_b, 60, False)
-        #     depth += -1
-                
-        # depth = 4     
-        # print "for black alpha_beta"  
-        # while depth >=0:
-        #     print depth
-        #     engines_b = __import__('engines.ti2181')
-        #     engines_w = __import__('engines.greedy')
-        #     engines_b.alpha_beta = True
-        #     engines_b.depth = depth
-        #     game(engine_b, engine_w, 60, False)
-        #     depth += -1
-
-        # depth = 2
-        # print "for white minmax"
-        # while depth >=0:
-        #     engines_b = __import__('engines.ti2181')
-        #     engines_w = __import__('engines.greedy')
-        #     engines_b.alpha_beta = True
-        #     engines_b.depth = depth
-        #     game(engine_w, engine_b, 60, False)
-        #     depth += -1
-        #         print "for white alpha_beta"
-
-        # depth = 2     
-        # print "for black minmax"  
-        # while depth >=0:
-        #     engines_b = __import__('engines.ti2181')
-        #     engines_w = __import__('engines.greedy')
-        #     engines_b.alpha_beta = True
-        #     engines_b.depth = depth
-        #     game(engine_b, engine_w, 60, False)
-        #     depth += -1
-
-
-        if black_engine =="ti2181":
-            c = -1
-        else:
-            c = 1
-        while trials < 100:
-            trials +=1
-            print trials
-            board, arr = game(engine_w, engine_b, 60, False)
-            if winner(board)[0] == c:
-                wins += 1
-                
-            elif winner(board)[0] == -1 * c:
-                losses += 1
-                print "you lost {0}-{1}".format(winner(board)[1],winner(board)[2])
-                for item in arr:
-                    item.display(time)
-            else: 
-                ties += 1
-
-        print "You won {0} many times, lost {1} times and tied {2} many times".format(wins,losses,ties)
-        print "Your percentage of wins was {0}%".format(float(wins)/float(trials))
-
-
+        # Play game
+	print player[-1] + " vs. " + player[1] + "\n"
+        main(engine_w, engine_b, game_time=args.t, verbose=v)
 
     except ImportError, e:
         print 'Unknown engine -- ' + e[0].split()[-1]

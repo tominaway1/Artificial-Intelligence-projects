@@ -21,14 +21,14 @@ class StudentEngine(Engine):
         self.times = []
         self.beginningq = True
         self.disk_square_table=[
-           [ 120, -20, 20, 5, 5, 20, -20,  120],
-           [-20, -40000000,  1, 1, 1,  1, -40000000, -25],
+           [ 120, -200, 20, 5, 5, 20, -200,  120],
+           [-200, -200,  1, 1, 1,  1, -200, -200],
            [ 10,   1,  5, 2, 2,  5,   1,  20],
            [  5,   1,  2, 1, 1,  2,   1,   5],
            [  5,   1,  2, 1, 1,  2,   1,   5],
            [ 10,   1,  5, 2, 2,  5,   1,  20],
-           [-20, -40000000,  1, 1, 1,  1, -40000000, -20],
-           [ 120, -20, 20, 5, 5, 20, -20,  120],
+           [-200, -200,  1, 1, 1,  1, -200, -200],
+           [ 120, -200, 20, 5, 5, 20, -200,  120],
         ]
         self.endgame=[
            [ 30, -1000, 10, 5, 5, 10, -1000,  30],
@@ -74,27 +74,27 @@ class StudentEngine(Engine):
 
         # beginning = time_remaining
         if time_remaining < 30:
-            self.DEPTH = 4
-        if time_remaining < 10:
             self.DEPTH = 3
-        if time_remaining < 5:
+        if time_remaining < 20:
             self.DEPTH = 2
-        if time_remaining < 2:
+        if time_remaining < 10:
+            self.DEPTH = 1
+        if time_remaining < 5:
             self.DEPTH = 0
 
         if self.alpha_beta:
             answer = self._do_alpha_beta_minimax(board,color)
         else:
-            # answer = self._do_minimax(board,color)
-            answer = self._do_alpha_beta_minimax1(board,color)
-
+            answer = self._do_minimax(board,color)
+        
+        self.times.append(time.time()-start)
         # print "The best move is {0}".format(answer)
         # print self.node
         # print self.count(self.duplicate)
-        # print self.branching_factor
-        # print float(self.branching_factor)/float(self.node)
+        # print float(self.node)/float(self.branching_factor)
         # print self.times
-        self.times.append(time.time()-start)
+        # print float(sum(self.times))/float(len(self.times))
+        
         if answer in corners:
             ks = key_spots[answer]
             for index in ks:
@@ -106,6 +106,7 @@ class StudentEngine(Engine):
 
     def _do_minimax(self, board, color):
         moves = board.get_legal_moves(color)
+        self.node += 1
         for move in moves:
             if move in corners:
                 return move
@@ -113,6 +114,13 @@ class StudentEngine(Engine):
         return max(moves, key=lambda move: self._get_cost(board, color, color, move,self.DEPTH))
 
     def _get_cost(self, board, color, current, move, depth):
+        self.node +=1
+        str_rep = self.stringrep(board) 
+        if str_rep in self.duplicate:
+            self.duplicate[str_rep] += 1
+        else:
+            self.duplicate[str_rep] = 0
+
         # Create a deepcopy of the board to preserve the state of the actual board
         newboard = deepcopy(board)
         #base case
@@ -127,6 +135,7 @@ class StudentEngine(Engine):
         newboard.execute_move(move, current)
         moves = newboard.get_legal_moves(current)
         
+        self.branching_factor += 1
         #check to see if you cannot make any more moves
         if len(moves)==0:
             if len(newboard.get_legal_moves(current * -1)) == 0:
@@ -151,11 +160,11 @@ class StudentEngine(Engine):
 
     def _do_alpha_beta_minimax(self, board, color):
         moves = board.get_legal_moves(color)
-        self.branching_factor += len(moves)
+        self.node += 1
         
-        #beginning steps
+        # beginning steps
         self.beginningq = True
-        if self.total_board(board) > 20:
+        if self.total_board(board) > 15:
             self.beginningq = False
         # if self.beginningq:
         #     temp = self.beginning_phase(moves,board,color)
@@ -172,8 +181,6 @@ class StudentEngine(Engine):
             if boolean[0]:
                 if boolean[1]:
                     arr.append(move)
-                else:
-                    arr2.append(move)
             if self.mid[move[0]][move[1]] == 1:
                 arr1.append(move)
         if arr:
@@ -208,20 +215,20 @@ class StudentEngine(Engine):
         if move[0] in danger or move[1] in danger:
             boolean = False
         boolean = True
+        boolean1 = False
         take_piece = False
         num = 0
         if move[0] == 0:
             if newboard[0][0] == color and newboard[0][7] == color:
                 if move[1] == 1 or move[1] == 6:
                     return (True,True)
-            # if move[1] in danger:
-            #     count = 0
-            #     for i in range(7):
-            #         if newboard[0][i] != 0:
-            #             count +=1
-            #         if count > 1:
-            #             return False
             for i in range(7):
+                if newboard[0][i] == color:
+                    boolean1 = True
+                    if newboard[0][i-1] == color * -1 or newboard[0][i+1] == color * -1:
+                        if newboard[0][i-1] == color * -1 and newboard[0][i+1] == color * -1:
+                            return (True,True)
+                        return (False,False)
                 if newboard[0][i] != 0:
                     num += 1
                 if newboard[0][i] == -1 * color:
@@ -233,6 +240,8 @@ class StudentEngine(Engine):
                         return (False, boolean)
                 if newboard[0][i] == color and board[0][i] == -1 * color:
                     take_piece = True 
+            if not boolean1:
+                return (False,False)
             if take_piece:
                 return (True,True)
             return (True,False)
@@ -243,6 +252,12 @@ class StudentEngine(Engine):
                 if move[1] == 1 or move[1] == 6:
                     return (True,True)
             for i in range(7):
+                if newboard[7][i] == color:
+                    boolean1 = True
+                    if newboard[7][i-1] == color * -1 or newboard[7][i+1] == color * -1:
+                        if newboard[7][i-1] == color * -1 and newboard[7][i+1] == color * -1:
+                            return (True,True)
+                        return (False,False)
                 if newboard[7][i] != 0:
                     num += 1
                 if newboard[7][i] == -1 * color:
@@ -256,6 +271,8 @@ class StudentEngine(Engine):
                         return (False, boolean)
                 if newboard[7][i] == color and board[7][i] == -1 * color:
                     take_piece = True
+            if not boolean1:
+                return (False,False)
             if take_piece:
                 return (True,True)
             return (True,False)
@@ -266,6 +283,12 @@ class StudentEngine(Engine):
                 if move[0] == 1 or move[0] == 6:
                     return (True,True)
             for i in range(7):
+                if newboard[i][0] == color:
+                    boolean1 = True
+                    if newboard[i-1][0] == color * -1 or newboard[i+1][0] == color * -1:
+                        if newboard[i-1][0] == color * -1 and newboard[i+1][0] == color * -1:
+                            return (True,True)
+                        return (False,False)
                 if newboard[i][0] != 0:
                     num += 1
                 if newboard[i][0] == -1 * color:
@@ -278,6 +301,8 @@ class StudentEngine(Engine):
                 if newboard[i][0] == color and board[i][0] == -1 * color:
                     take_piece = True 
                     # print "Got here"
+            if not boolean1:
+                return (False,False)
             if take_piece:
                 return (True,True)
             return (True,False)
@@ -288,6 +313,12 @@ class StudentEngine(Engine):
                 if move[0] == 1 or move[0] == 6:
                     return (True,True)
             for i in range(7):
+                if newboard[i-1][7] == color * -1 or newboard[i+1][7] == color * -1:
+                    if newboard[i-1][7] == color * -1 and newboard[i+1][7] == color * -1:
+                        return (True,True)
+                    return (False,False)
+                if newboard[i][7] == color:
+                    boolean1 = True
                 if newboard[i][7] != 0:
                     num += 1
                 if newboard[i][7] == -1 * color:
@@ -299,6 +330,8 @@ class StudentEngine(Engine):
                         return (False, boolean)
                 if newboard[i][7] == color and board[i][7] == -1 * color:
                     take_piece = True 
+            if not boolean1:
+                return (False,False)
             if take_piece:
                 return (True,True)
             return (True,False)
@@ -335,7 +368,7 @@ class StudentEngine(Engine):
         moves = newboard.get_legal_moves(current)
         
         #stats
-        self.branching_factor += len(moves)
+        self.branching_factor += 1
 
         #check to see if you cannot make any more moves
         if len(moves) == 0:
@@ -372,7 +405,12 @@ class StudentEngine(Engine):
             return float("inf")
 
         #return num_pieces_me - num_pieces_op
-        count = num_pieces_me - num_pieces_op
+        if self.beginning:
+            count = num_pieces_op - num_pieces_me
+            count = count * 4
+        else:
+            count = num_pieces_me - num_pieces_op
+            count = count * 2
 
         #get total points
         total = 0
@@ -400,7 +438,7 @@ class StudentEngine(Engine):
         count = 0
         for item in dictionary:
             if dictionary[item] > 0:
-                count += 1
+                count += dictionary[item]
         return count
     #create string representation of dictionary
     def stringrep(self,board):
@@ -495,7 +533,5 @@ class StudentEngine(Engine):
            [ -1, -1,-1, -1, -1, -1, -1,-1],
            [ 1, -1,-1, -1, -1, -1, -1,  1],
         ]
-        print "poop"
-
 
 engine = StudentEngine
