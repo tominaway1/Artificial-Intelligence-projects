@@ -357,7 +357,7 @@ def solve_puzzle(puz,component_output,mode,limit,score_adjust,second_round=True)
 
     # PART 2 GOES HERE - FILL IN BLANK SQUARES
     print "\nEvaluating filled solution ...."
-    solution = fill(solution,weight_dict,puz)
+    solution = fill(solution,weight_dict,puz,domains,neighbors)
     evaluation = puz.evaluate_solution(problem,solution,'_after_fill')
 
     end2 = time.time()
@@ -366,14 +366,14 @@ def solve_puzzle(puz,component_output,mode,limit,score_adjust,second_round=True)
 
     return evaluation,solution
 
-def fill(solution,wd,puz):
+def fill(solution,wd,puz,domains,neighbors):
     print solution
     f = open("../answers_cwg_otsys.txt")
     d = make_dict(f.read())
-    ans = eval_sol(solution,wd,puz,d)
+    ans = eval_sol(solution,wd,puz,d,domains,neighbors)
     return ans
 
-def eval_sol(solution,wd,puz,d):
+def eval_sol(solution,wd,puz,d,domains,neighbors):
     for key in solution:
         #get list of possible words
         temp = solution[key]
@@ -397,10 +397,10 @@ def eval_sol(solution,wd,puz,d):
                     max_word = item
         if max_word:
             solution[key] = max_word
-            
+            success, next_domains, next_S = propagate(key,max_word,puz,domains,neighbors,solution)
             # print max_word
             # print key
-            # return eval_sol(solution,wd,puz,d) 
+            return eval_sol(solution,wd,puz,d,domains,neighbors) 
     return solution
 
 def check_letters(temp,item):

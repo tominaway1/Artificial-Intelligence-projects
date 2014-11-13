@@ -14,18 +14,19 @@ The lowest setting of n that lets my solver complete every puzzle in monday_puzz
 solver is able to complete all the puzzles but 1 with very good accuracy at n=1.
 
 Here were the outputs when n=1:
- runtime_before_fill : 4.91
+
+ runtime_before_fill : 6.76
  total_squares : 189.00
- matching_squares_before_fill : 142.00
- runtime_before_fill : 5.97
+ matching_squares_before_fill : 175.00
+ runtime_before_fill : 7.62
  total_squares : 187.00
- matching_squares_before_fill : 132.00
- runtime_before_fill : 5.01
+ matching_squares_before_fill : 166.00
+ runtime_before_fill : 4.97
  total_squares : 187.00
- matching_squares_before_fill : 110.00
- runtime_before_fill : 4.71
+ matching_squares_before_fill : 139.00
+ runtime_before_fill : 5.95
  total_squares : 188.00
- matching_squares_before_fill : 148.00
+ matching_squares_before_fill : 179.00
 
 
 
