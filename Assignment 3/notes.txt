@@ -1,0 +1,27 @@
+Hi everyone, a few updates:
+ 
+Just letting you know that there's no need to resubmit your ideas or clue lists unless I explicitly tell you to (ie, with a deadline). I gave many of you comments on your ideas. This doesn't mean you need to resubmit. Of course, if you'd like to send me a revised idea, I'm happy to provide feedback, but this isn't a requirement. As a heads up, I've also finished the component assignments of late submissions.
+ 
+I stayed with a few students after class to go over the Dr. Fill 6.4 algorithm. A few notes:
+- Keep in mind that the two "if" conditions in the psuedocode are not nested
+- The intuition of "n" is that it determines how far the best solution can diverge from the greedy solution; in searching for the best solution, we pass over the greedy choice up to n times. If n=0, we have a greedy algorithm.
+- weight_dict in solver.py is a double dict that provides the scores of the word options. If "cat" is an option for entry "1A", I can look up weight_dict["1A"]["cat"] to find its score.
+- Check out the propagate method in solver.py - it does a lot for you. If you specify v and d (an entry and a particular word to put in that entry), it will give you an updated solution and updated domains (that is, it will go through the possible words for each intersecting entry and filter out the ones that contradict the assignment of v to d).
+ 
+Finally, these example commands will search our Wikipedia index for "Barack Obama." search_wiki.bash will return a blob of JSON that contains the titles of the articles that match the search, and the for loop below will print them.
+% cd ~/Project3/derek
+% ./search_wiki.bash 10 \'barack obama\'
+% for i in `./search_wiki_paths.bash 100 \'barack obama\'`; do head -3 $i | tail -1; done | more
+
+
+
+solve(C, S, B, n, P): 
+	if S assigns every variable, return whichever of S and B has higher total score 
+	v <- the variable with the maximum difference between the scores of its 1st and 2nd highest- scoring word possibilities 
+	d <- the highest-scoring word possibility of v S' <- S plus the assignment of v to d 
+	C' <- propagation of the assignment of v to d in C (ie, set v to d in the CSP, make sure the constraint is still satisfied, and eliminate word possibilities for intersecting entries that would conflict with it) 
+	if C' is still valid, B <- solve(C', S', B, n, P)
+	if |P|<n, P' <- P plus the assignment of v to d, and B <- solve(C, S, B, n, P')
+	return B
+
+
