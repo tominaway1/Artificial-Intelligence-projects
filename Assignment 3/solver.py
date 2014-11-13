@@ -371,7 +371,6 @@ def fill(solution,wd,puz):
     f = open("../answers_cwg_otsys.txt")
     d = make_dict(f.read())
     ans = eval_sol(solution,wd,puz,d)
-    print ans
     return ans
 
 def eval_sol(solution,wd,puz,d):
@@ -398,11 +397,10 @@ def eval_sol(solution,wd,puz,d):
                     max_word = item
         if max_word:
             solution[key] = max_word
-            for k in solution.keys():
-                solution = puz.update_solution(solution,k)
-            print max_word
-            print key
-            return eval_sol(solution,wd,puz,d) 
+            
+            # print max_word
+            # print key
+            # return eval_sol(solution,wd,puz,d) 
     return solution
 
 def check_letters(temp,item):
