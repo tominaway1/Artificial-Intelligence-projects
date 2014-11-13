@@ -278,17 +278,17 @@ def solve_recursive(puz,variables,domains,weight_dict,neighbors,S_o,B_o,n,P_o):
                 second = i
                 continue
             break
-        if (not first) or (not second):
-            if second:
-                S[var] = first
-            else:
-                S[var]= "-" * puz.entries[var].length
+        if (not first):
+            S[var]= "-" * puz.entries[var].length
             for k in S.keys():
                 S = puz.update_solution(S,k) 
             continue
 
         else:
-            diff = weight_dict[var][first] - weight_dict[var][second]
+            if second:
+                diff = weight_dict[var][first] - weight_dict[var][second]
+            else:
+                diff = weight_dict[var][first]
             if diff > max_diff:
                 max_diff = diff
                 v = var

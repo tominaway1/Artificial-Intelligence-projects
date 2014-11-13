@@ -54,18 +54,18 @@ N represents the branching factor at every node. Every node will have n children
 
 
 
-
-
-
-
-
-
-
-
 To change n, all you have to do is change the corresponding paramater when it is being called in solve_puzzle.
 I call solve_recursive(puz,variables,domains,weight_dict,neighbors,{},{},n,{}) so it is a matter of
 changing that parameter
 
 
 
-for f in ../monday_puzzles/*.puz; do ./solve_a_puzzle.py $f component_list | grep 'runtime_before_fill\|total_squares\| matching_squares_before_fill'; done
+
+Part 2)
+
+
+
+
+
+
+
