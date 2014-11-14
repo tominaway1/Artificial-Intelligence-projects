@@ -374,15 +374,16 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
     solution = copy.deepcopy(S_o)
     B = copy.deepcopy(B_o)
     variables = copy.deepcopy(v)
-
+    print variables
     #base case
     if len(variables) == 0:
         #return B or S depending which has higher score
         if count_letters(solution) > count_letters(B):
+            print solution
             return solution
         else:
+            print B
             return B
-    
     #recursive case
     eval_arr = {}
 
@@ -400,7 +401,11 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
             #delete from variables array
             variables.remove(key)
             continue
+        temp_arr = []
         for item in arr:
+            if not check_letters(temp,item):
+                continue
+            temp_arr.append(item)
             if key not in weight_dict:
                 continue
             if item not in weight_dict[key]:
@@ -411,32 +416,42 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
                     max_val = weight_dict[key][item]
                     max_word = item
         if max_word:
+            print max_word
+            print key
             eval_arr[key] = max_word
+        elif len(temp_arr) > 0:
+            eval_arr[key] = temp_arr[0]
         else:
             variables.remove(key)
-
 
     if len(variables) == 0:
         #return B or S depending which has higher score
         if count_letters(solution) > count_letters(B):
+            print solution
             return solution
         else:
+            print B
             return B
+    i = 0
     for var in variables:
-        del[solution[var]]
-        success, next_domains, next_S = propagate(var,eval_arr[var],puz,domains,neighbors,solution)
-        if success:
-            B = fill(puz,variables,next_domains,weight_dict,neighbors,next_S,B,d)
+        if i == 2:
+            # break
+        S = copy.deepcopy(solution)
+        print "word chosen to fill {0} is {1}".format(S[var],eval_arr[var])
+        S[var] = eval_arr[var]
+        for k in S.keys():
+            S = puz.update_solution(S,k)
+        temp_var = copy.deepcopy(variables)
+        temp_var.remove(var) 
+
+        B = fill(puz,temp_var,domains,weight_dict,neighbors,S,B,d)
+        i += 1
     return B
 
 def check_letters(temp,item):
     length = len(temp)
     for i in range(length):
         if temp[i] != "-" and temp[i] != item[i]:
-            print "-------"
-            print temp[i]
-            print item[i]
-            print "-------"
             return False
     return True
 
