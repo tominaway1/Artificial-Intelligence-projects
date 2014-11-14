@@ -357,7 +357,10 @@ def solve_puzzle(puz,component_output,mode,limit,score_adjust,second_round=True)
 
     # PART 2 GOES HERE - FILL IN BLANK SQUARES
     print "\nEvaluating filled solution ...."
-    solution = fill(solution,weight_dict,puz,domains,neighbors)
+    #make dictionary
+    f = open("../answers_cwg_otsys.txt")
+    d = make_dict(f.read())
+    solution = fill(puz,variables,domains,weight_dict,neighbors,solution,solution,d)
     evaluation = puz.evaluate_solution(problem,solution,'_after_fill')
 
     end2 = time.time()
@@ -366,15 +369,25 @@ def solve_puzzle(puz,component_output,mode,limit,score_adjust,second_round=True)
 
     return evaluation,solution
 
-def fill(solution,wd,puz,domains,neighbors):
-    print solution
-    f = open("../answers_cwg_otsys.txt")
-    d = make_dict(f.read())
-    ans = eval_sol(solution,wd,puz,d,domains,neighbors)
-    return ans
+def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
+    #deep copy all variables
+    solution = copy.deepcopy(S_o)
+    B = copy.deepcopy(B_o)
+    variables = copy.deepcopy(v)
 
-def eval_sol(solution,wd,puz,d,domains,neighbors):
-    for key in solution:
+    #base case
+    if len(variables) == 0:
+        #return B or S depending which has higher score
+        if count_letters(solution) > count_letters(B):
+            return solution
+        else:
+            return B
+    
+    #recursive case
+    eval_arr = {}
+
+    #find all variables that can be replaced
+    for key in v:
         #get list of possible words
         temp = solution[key]
         arr = d[len(temp)]
@@ -382,26 +395,39 @@ def eval_sol(solution,wd,puz,d,domains,neighbors):
         max_word = None
         max_val = float("-inf")
         boolean = True
+        #check if word is complete
         if "-" not in temp:
+            #delete from variables array
+            variables.remove(key)
             continue
-
         for item in arr:
-            if key not in wd:
+            if key not in weight_dict:
                 continue
-            if item not in wd[key]:
+            if item not in weight_dict[key]:
                 continue
-            if wd[key][item] > max_val:
+            if weight_dict[key][item] > max_val:
                 if check_letters(temp,item):
                     print key
-                    max_val = wd[key][item]
+                    max_val = weight_dict[key][item]
                     max_word = item
         if max_word:
-            solution[key] = max_word
-            success, next_domains, next_S = propagate(key,max_word,puz,domains,neighbors,solution)
-            # print max_word
-            # print key
-            return eval_sol(solution,wd,puz,d,domains,neighbors) 
-    return solution
+            eval_arr[key] = max_word
+        else:
+            variables.remove(key)
+
+
+    if len(variables) == 0:
+        #return B or S depending which has higher score
+        if count_letters(solution) > count_letters(B):
+            return solution
+        else:
+            return B
+    for var in variables:
+        del[solution[var]]
+        success, next_domains, next_S = propagate(var,eval_arr[var],puz,domains,neighbors,solution)
+        if success:
+            B = fill(puz,variables,next_domains,weight_dict,neighbors,next_S,B,d)
+    return B
 
 def check_letters(temp,item):
     length = len(temp)
@@ -413,6 +439,15 @@ def check_letters(temp,item):
             print "-------"
             return False
     return True
+
+#count all non blanks
+def count_letters(d):
+    ans = 0
+    for key in d:
+        for c in d[key]:
+            if c != "-":
+                ans += 1
+    return ans
 
 
 def make_dict(bank):
