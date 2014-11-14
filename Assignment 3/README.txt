@@ -34,18 +34,18 @@ Here were the outputs when n=1:
 monday_puzzles in less than 20 minutes is n=3. 
 
 Here were the outputs when n=3:
- runtime_before_fill : 562.74
+ runtime_before_fill : 1332.08
  total_squares : 189.00
- matching_squares_before_fill : 152.00
- runtime_before_fill : 743.31
+ matching_squares_before_fill : 175.00
+ runtime_before_fill : 1420.40
  total_squares : 187.00
- matching_squares_before_fill : 139.00
- runtime_before_fill : 693.15
+ matching_squares_before_fill : 174.00
+ runtime_before_fill : 801.03
  total_squares : 187.00
- matching_squares_before_fill : 118.00
- runtime_before_fill : 567.85
+ matching_squares_before_fill : 150.00
+ runtime_before_fill : 1234.66
  total_squares : 188.00
- matching_squares_before_fill : 154.00
+ matching_squares_before_fill : 179.00
 
 
 
