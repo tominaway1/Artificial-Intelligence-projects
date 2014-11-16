@@ -434,8 +434,8 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
             return B
     i = 0
     for var in variables:
-        if i == 2:
-            # break
+        if i == 5:
+            break
         S = copy.deepcopy(solution)
         print "word chosen to fill {0} is {1}".format(S[var],eval_arr[var])
         S[var] = eval_arr[var]

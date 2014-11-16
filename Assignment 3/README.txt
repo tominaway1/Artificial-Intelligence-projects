@@ -59,7 +59,14 @@ To change n, all you have to do is change the corresponding paramater when it is
 I call solve_recursive(puz,variables,domains,weight_dict,neighbors,{},{},n,{}) so it is a matter of
 changing that parameter
 
-
+ matching_squares_after_fill : 176.00
+ total_squares : 189.00
+ matching_squares_after_fill : 169.00
+ total_squares : 187.00
+ matching_squares_after_fill : 138.00
+ total_squares : 187.00
+ matching_squares_after_fill : 180.00
+ total_squares : 188.00
 
 
 Part 2)
