@@ -3,6 +3,8 @@ import sys
 import subprocess
 from wordnik.wordnik import *
 
+ignore = ['a','able','about','above','across','after','again','against','aint','all','almost','also','am','among','an','and','any','are','arent','as','at','be','because','been','before','being','below','between','both','but','by','can','cant','cannot','could','couldve','couldnt','dear','did','didnt','do','does','doesnt','doing','dont','down','during','each','either','else','ever','every','few','for','from','further','get','got','had','hadnt','has','hasnt','have','havent','having','he','hed','hell','hes','her','here','heres','hers','herself','him','himself','his','how','howd','howll','hows','however','i','id','ill','im','ive','if','in','into','is','isnt','it','its','its','itself','just','least','let','lets','like','likely','may','me','might','mightve','mightnt','more','most','must','mustve','mustnt','my','myself','neither','no','nor','not','of','off','often','on','once','only','or','other','ought','our','ours','ourselves','out','over','own','rather','said','same','say','says','shall','shant','she','shed','shell','shes','should','shouldve','shouldnt','since','so','some','such','than','that','thatll','thats','the','their','theirs','them','themselves','then','there','theres','these','they','theyd','theyll','theyre','theyve','this','those','through','tis','to','too','twas','under','until','up','us','very','wants','was','wasnt','we','wed','well','were','weve','were','werent','what','whatd','whats','when','whend','whenll','whens','where','whered','wherell','wheres','which','while','who','whod','wholl','whos','whom','why','whyd','whyll','whys','will','with','wont','would','wouldve','wouldnt','yet','you','youd','youll','youre','youve','your','yours','yourself','yourselves']
+
 def init():
     apiUrl = 'http://api.wordnik.com/v4'
     apiKey = '0447438b71e16b1fe640c0524220f075951133d14bb14890e'
@@ -12,13 +14,6 @@ def init():
     # definitions = wordApi.getDefinitions('badger',sourceDictionaries='wiktionary',limit=1)
     # print definitions[0].text
 
-
-def get_answers(state, length, definition_of):
-    if definition_of.has_key(state):
-        return definition_of[state]
-    else:
-        return ""
-ignore = ['a','able','about','above','across','after','again','against','aint','all','almost','also','am','among','an','and','any','are','arent','as','at','be','because','been','before','being','below','between','both','but','by','can','cant','cannot','could','couldve','couldnt','dear','did','didnt','do','does','doesnt','doing','dont','down','during','each','either','else','ever','every','few','for','from','further','get','got','had','hadnt','has','hasnt','have','havent','having','he','hed','hell','hes','her','here','heres','hers','herself','him','himself','his','how','howd','howll','hows','however','i','id','ill','im','ive','if','in','into','is','isnt','it','its','its','itself','just','least','let','lets','like','likely','may','me','might','mightve','mightnt','more','most','must','mustve','mustnt','my','myself','neither','no','nor','not','of','off','often','on','once','only','or','other','ought','our','ours','ourselves','out','over','own','rather','said','same','say','says','shall','shant','she','shed','shell','shes','should','shouldve','shouldnt','since','so','some','such','than','that','thatll','thats','the','their','theirs','them','themselves','then','there','theres','these','they','theyd','theyll','theyre','theyve','this','those','through','tis','to','too','twas','under','until','up','us','very','wants','was','wasnt','we','wed','well','were','weve','were','werent','what','whatd','whats','when','whend','whenll','whens','where','whered','wherell','wheres','which','while','who','whod','wholl','whos','whom','why','whyd','whyll','whys','will','with','wont','would','wouldve','wouldnt','yet','you','youd','youll','youre','youve','your','yours','yourself','yourselves']
 def find_def(clue,length,wordapi):   
 
     word_arr = clue.split()
@@ -53,13 +48,14 @@ def run_bash(clue,length):
 
 def filter_words(arr,length):
     def_dict = {}
-    prob_dict = {}
     max_ans = float("-inf")
     for item in arr:
         for word in item.split():
             #get rid of all blank spaces or quotations or dashes etc
             word = ''.join(c for c in word if c not in ' ()[]\/|.-,\'\"')
             if word in ignore:
+                continue
+            if not word:
                 continue
             if len(word) != int(length):
                 continue
@@ -82,7 +78,10 @@ def process_line(line,wordapi):
     if line != "":
         clueid,clue,length = '','',''
     try:
-        clueid,clue,length = line.split('\t')
+        temp = line.split('\t')
+        clueid = temp[0]
+        clue = temp [1]
+        length = temp[2]
     except Exception as e:
         print line
     output = run_bash(clue,length)
