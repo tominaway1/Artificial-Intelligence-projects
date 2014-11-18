@@ -24,4 +24,5 @@ solve(C, S, B, n, P):
 	if |P|<n, P' <- P plus the assignment of v to d, and B <- solve(C, S, B, n, P')
 	return B
 
-
+./print_puzzle.py -c ../monday_puzzles/May1214.puz | head -n -1 | python ../components/definition_component.py >> ../monday_puzzles/May1214.puz.output
+./print_puzzle.py -c ../monday_puzzles/May1214.puz | head -n -1 | python ../components/book_component.py >> ../monday_puzzles/May1214.puz.output

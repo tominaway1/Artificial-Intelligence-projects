@@ -182,8 +182,6 @@ class RebusError(Exception):
 
 
 def propagate(next_var, next_val, puz, domains, neighbors, S):
-    print 'calling propagate ...........'
-
     # Check for assigned neighbors of next variable
     for neighbor in neighbors[next_var]:
         # if this neighbor is already assigned
@@ -374,15 +372,14 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
     solution = copy.deepcopy(S_o)
     B = copy.deepcopy(B_o)
     variables = copy.deepcopy(v)
-    print variables
     #base case
     if len(variables) == 0:
         #return B or S depending which has higher score
         if count_letters(solution) > count_letters(B):
-            print solution
+            #print solution
             return solution
         else:
-            print B
+            #print B
             return B
     #recursive case
     eval_arr = {}
@@ -416,8 +413,8 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
                     max_val = weight_dict[key][item]
                     max_word = item
         if max_word:
-            print max_word
-            print key
+            #print max_word
+            #print key
             eval_arr[key] = max_word
         elif len(temp_arr) > 0:
             eval_arr[key] = temp_arr[0]
@@ -427,17 +424,14 @@ def fill(puz,v,domains,weight_dict,neighbors,S_o,B_o,d):
     if len(variables) == 0:
         #return B or S depending which has higher score
         if count_letters(solution) > count_letters(B):
-            print solution
             return solution
         else:
-            print B
             return B
     i = 0
     for var in variables:
-        if i == 5:
+        if i == 1:
             break
         S = copy.deepcopy(solution)
-        print "word chosen to fill {0} is {1}".format(S[var],eval_arr[var])
         S[var] = eval_arr[var]
         for k in S.keys():
             S = puz.update_solution(S,k)

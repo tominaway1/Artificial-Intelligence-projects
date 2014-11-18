@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 import re
 import sys
 import subprocess
@@ -15,10 +16,10 @@ def init():
     # print definitions[0].text
 
 def find_def(clue,length,wordapi):   
-
     word_arr = clue.split()
     answer = []
     for word in word_arr:
+        word = word.lower()
         if len(word)<2:
             continue
         if word in ignore:
@@ -28,16 +29,18 @@ def find_def(clue,length,wordapi):
             continue
         # print definition[0].text
         for words in definition[0].text.split():
+            words = words.lower()
             if words in ignore:
                 continue
             words = ''.join(c for c in words if c not in ' ()[]\/|.-,\'\"')
             if len(words) == int(length):
-                answer.append(words)
+                answer.append(words.lower())
             # else:
             #     print "The word was {0} with length of {1} with size {2}".format(words,length,len(words))
     return answer
 
 def run_bash(clue,length):
+    clue = ''.join(c for c in clue if c not in '()[]\/|.-,\'\"')
     cmd ="for i in `../derek/search_wiki_paths.bash 100 \'{}\'`; do head -3 $i | tail -1; done".format(clue)
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     (output, err) = p.communicate()
@@ -51,6 +54,7 @@ def filter_words(arr,length):
     max_ans = float("-inf")
     for item in arr:
         for word in item.split():
+            word = word.lower()
             #get rid of all blank spaces or quotations or dashes etc
             word = ''.join(c for c in word if c not in ' ()[]\/|.-,\'\"')
             if word in ignore:
@@ -59,12 +63,12 @@ def filter_words(arr,length):
                 continue
             if len(word) != int(length):
                 continue
-            if word in def_dict:
-                temp = def_dict[word] + 1
-                def_dict[word] = temp
+            if word.lower() in def_dict:
+                temp = def_dict[word.lower()] + 1
+                def_dict[word.lower()] = temp
             else:
                 temp = 1
-                def_dict[word] = 1
+                def_dict[word.lower()] = 1
             if temp > max_ans:
                 max_ans = temp
     for key in def_dict:
@@ -85,16 +89,17 @@ def process_line(line,wordapi):
     except Exception as e:
         print line
     output = run_bash(clue,length)
-    for word in find_def(clue,length,wordapi):
-        if word in output:
-            if output[word]+.4 < .9:
-                output[word] = output[word] +.2
+    try:
+        for word in find_def(clue,length,wordapi):
+            if word.lower() in output:
+                if output[word.lower()]+.4 < .9:
+                    output[word.lower()] = output[word.lower()] +.2
+                else:
+                    output[word.lower()] = .9
             else:
-                output[word] = .9
-        else:
-            output[word] = .3
-
-
+                output[word.lower()] = .3
+    except:
+        pass
 	# if match, then return the result
     for word in output:
         print "\t".join([clueid,word,str(output[word])])
