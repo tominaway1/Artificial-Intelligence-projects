@@ -87,11 +87,6 @@ To see each component in action, run these commands:
 1) python definition_component.py < definition_test
 2) python book_component.py < book_component
 
-
-
-
-
-
 Assigned component: I was assigned component 24 which was dictionary definitions. This proved to be very tricky because no clues outright asks for a definition but rather gives a definition. 
 I found that the wikipedia query did a very good job of returning the word from a dictionary definition with good confidence. But for obscure definitions or references, it was helpful to have an additional feature. Thus, I utilized a dictionary API http://developer.wordnik.com/ that allowed me to query for dictionary definitions of words. I then parsed the input and found the definition of the words in the definition and surprisingly enough, the original word comes up very frequently. So I combined the results of both by parsing the results that I receive and calculating the probability using word frequency. The more repeated a word is in both the wikipedia query and wordnik query, the higher it's probability. 
 Assigned component performance: Unfortunately this component was not that great in improving the performance of the crossword puzzle solver. There is just no way to find out if the clue is asking for the definition of the clue and thus it is important for me to keep the resulting probabilities low because sometimes they are not remotely close to the answer but happen to be in the output. In almost all cases though, the word is always returned in the case that the definition was given but many of the times it is of very low probability or average. 
