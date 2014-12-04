@@ -178,9 +178,30 @@ class DecisionTree:
         return self
 
     def outputDecisionTree(self, path):
-        # implement this function
+        function_definition = "def predict(example):\n"
+        output = self.printsubtree(1)
         with open(path, 'w') as f:
-            print >>f, " "      
+            print >> f,function_definition + output
+    
+    def printsubtree(self,indent):
+        current = self.attr
+        boolean = True
+        output = ''
+        for (val, subtree) in self.branches.items():
+            if boolean:
+                boolean = False
+                if_statement = "if"
+            else:
+                if_statement = "elif"
+            if isinstance(subtree, DecisionTree):
+                output += '{0}{1} str(example[{2}]) == "{3}":\n'.format(indent*"\t",if_statement,current,val)
+                output += '{1}\n'.format((indent+1)*"\t",subtree.printsubtree(indent+1))
+            else:
+                output += '{0}{1} str(example[{2}]) == "{3}":\n'.format(indent*"\t",if_statement,current,val)
+                output += '{0}return "{1}"\n'.format((indent+1)*"\t",subtree)
+        return output      
+        
+
 
     def count_nodes(self):
         name = self.attrname
