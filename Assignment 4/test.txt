@@ -1,0 +1,24 @@
+T, T, Lost
+T, T, Lost
+T, F, Lost
+T, F, Lost
+F, T, NotLost
+F, T, NotLost
+F, T, NotLost
+F, T, NotLost
+F, T, NotLost
+F, F, Lost
+
+Test X1
+	X1 = T ==> RESULT =  Lost
+	X1 = F ==> Test X2
+		X2 = T ==> RESULT =  NotLost
+		X2 = F ==> RESULT =  Lost
+
+DecisionTree(0, 'X1', {'T': 'Lost', 'F': DecisionTree(1, 'X2', {'T': 'NotLost', 'F': 'Lost'})})
+
+split_by
+
+
+
+

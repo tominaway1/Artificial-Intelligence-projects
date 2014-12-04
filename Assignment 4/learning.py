@@ -218,27 +218,14 @@ class DecisionTreeLearner(Learner):
     
     def prune(self, dataset, maxDeviation):
         dt = self.dt
-        #check if already a leaf node
         tree = dt.branches
         v = dt.attr
-        # print tree
-        # if not isinstance(tree['T'],DecisionTree) and not isinstance(tree['F'],DecisionTree):
-        #     return 
-
         for item in dataset.values[v]:
             if isinstance(tree[item],DecisionTree):
                 new_dataset = deepcopy(dataset)
                 new_examples = self.make_array(new_dataset.examples,item,v)
                 new_dataset.examples = new_examples
                 self.dt.branches[item] = self.prune_helper(tree[item],new_dataset,maxDeviation)
-
-        # #evaluate subtrees
-        # if isinstance(tree['F'],DecisionTree):
-        #     new_dataset = deepcopy(dataset)
-        #     new_examples = self.make_array(new_dataset.examples,'F',v)
-        #     new_dataset.examples = new_examples
-        #     self.dt.branches['F'] = self.prune_helper(tree['F'],new_dataset,maxDeviation)
-        dt.display()
         return
 
     def make_array(self, examples, compare,v):
@@ -252,43 +239,36 @@ class DecisionTreeLearner(Learner):
         tree = dt.branches
         v = dt.attr
         #check left and right subtrees
-        print tree
         for item in current_dataset.values[v]:
             if isinstance(tree[item],DecisionTree):
                 new_dataset = deepcopy(current_dataset)
                 new_examples = self.make_array(new_dataset.examples,item,v)
                 new_dataset.examples = new_examples
                 dt.branches[item] = self.prune_helper(tree[item],new_dataset,maxDeviation)
-        # if isinstance(tree['F'],DecisionTree):
-        #     new_dataset = deepcopy(dataset)
-        #     new_examples = self.make_array(new_dataset.examples,'F',v)
-        #     new_dataset.examples = new_examples
-        #     dt.branches['F'] = self.prune_helper(tree['F'],new_dataset,maxDeviation)
+                tree = dt.branches
 
         #check if you can prune
-        if not isinstance(tree['T'],DecisionTree) and not isinstance(tree['F'],DecisionTree):
-            #make copy of left subtree
-            left_dataset = deepcopy(current_dataset)
-            new_examples = self.make_array(left_dataset.examples,'F',v)
-            left_dataset.examples = new_examples
-            #make copy of right subtree
-            right_dataset = deepcopy(current_dataset)
-            new_examples = self.make_array(right_dataset.examples,'T',v)
-            right_dataset.examples = new_examples
-
+        if all(not isinstance(tree[item],DecisionTree) for item in current_dataset.values[v]):
+            arr = []
+            for item in current_dataset.values[v]:
+                new_dataset = deepcopy(current_dataset)
+                new_examples = self.make_array(new_dataset.examples,item,v)
+                new_dataset.examples = new_examples
+                arr.append(new_dataset)
             estimated_values = self.find_percentages(current_dataset)
-            #left tree and right tree
-            left_values = self.find_percentages(left_dataset)
-            right_values = self.find_percentages(right_dataset)
+            for i in range(len(arr)):
+                arr[i] = self.find_percentages(arr[i])
+            # left_values = self.find_percentages(left_dataset)
+            # right_values = self.find_percentages(right_dataset)
 
             #find deviations
-            dev = self.find_deviation(estimated_values,left_values,right_values)
+            dev = self.find_deviation(estimated_values,arr)
             if dev < maxDeviation:
                 return self.find_max(estimated_values)
             else:
-                return tree
+                return dt
         else:
-            return tree
+            return dt
     
     def find_max(self,d):
         maximum = 0
@@ -299,18 +279,19 @@ class DecisionTreeLearner(Learner):
                 ans = key
         return ans
 
-
-
-    def find_deviation(self, estimated_values, left_values, right_values):
+    def find_deviation(self, estimated_values, arr):
+        arr1 = []
         dev = 0
-        total = self.find_total(estimated_values)
-        left_total = self.find_total(left_values)
-        right_total = self.find_total(right_values)
+        total_all = self.find_total(estimated_values)
+        # left_total = self.find_total(left_values)
+        # right_total = self.find_total(right_values)
+
         for key in estimated_values:
-            expected_left = (estimated_values[key] * left_total * 1.0) / (total * 1.0)
-            expected_right = (estimated_values[key] * right_total * 1.0) / (total * 1.0)
-            dev += (expected_left-left_values[key])**2 / expected_left + (expected_right - right_values[key])**2 / expected_right
-        print dev
+            for item in arr:
+                total = self.find_total(item)
+                expected = (estimated_values[key] * total * 1.0) / (total_all * 1.0 + .000000000000000000001)
+                # expected_right = (estimated_values[key] * total * 1.0) / (total_all * 1.0)
+                dev += (expected-item[key])**2 / (expected+.0000000000000000000001) #+ (expected_right - right_values[key])**2 / expected_right
         return dev
     
     def find_total(self,d):
