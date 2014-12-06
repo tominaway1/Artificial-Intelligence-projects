@@ -245,16 +245,12 @@ class DecisionTreeLearner(Learner):
         self.dt = self.decision_tree_learning(dataset.examples, dataset.inputs)
     
     def prune(self, dataset, maxDeviation):
-        dt = self.dt
-        tree = dt.branches
-        v = dt.attr
-        for item in dataset.values[v]:
-            if isinstance(tree[item],DecisionTree):
+        for (val, subtree) in self.dt.branches.items():
+            if isinstance(subtree, DecisionTree):
                 new_dataset = deepcopy(dataset)
-                new_examples = self.make_array(new_dataset.examples,item,v)
+                new_examples = self.make_array(new_dataset.examples,val,self.dt.attr)
                 new_dataset.examples = new_examples
-                self.dt.branches[item] = self.prune_helper(tree[item],new_dataset,maxDeviation)
-        return
+                self.dt.branches[val] = self.prune_helper(subtree,new_dataset,maxDeviation)
 
     def make_array(self, examples, compare,v):
         new_examples = []
@@ -263,40 +259,35 @@ class DecisionTreeLearner(Learner):
                 new_examples.append(item)
         return new_examples
 
-    def prune_helper(self,dt,current_dataset,maxDeviation):
-        tree = dt.branches
-        v = dt.attr
+    def prune_helper(self,tree,current_dataset,maxDeviation):
         #check left and right subtrees
-        for item in current_dataset.values[v]:
-            if isinstance(tree[item],DecisionTree):
+        for (val, subtree) in tree.branches.items():
+            if isinstance(subtree, DecisionTree):
                 new_dataset = deepcopy(current_dataset)
-                new_examples = self.make_array(new_dataset.examples,item,v)
+                new_examples = self.make_array(new_dataset.examples,val,tree.attr)
                 new_dataset.examples = new_examples
-                dt.branches[item] = self.prune_helper(tree[item],new_dataset,maxDeviation)
-                tree = dt.branches
+                tree.branches[val] = self.prune_helper(subtree,new_dataset,maxDeviation)
 
         #check if you can prune
-        if all(not isinstance(tree[item],DecisionTree) for item in current_dataset.values[v]):
+        if all(not isinstance(subtree,DecisionTree) for (val, subtree) in tree.branches.items()):
             arr = []
-            for item in current_dataset.values[v]:
+            for (val, subtree) in tree.branches.items():
                 new_dataset = deepcopy(current_dataset)
-                new_examples = self.make_array(new_dataset.examples,item,v)
+                new_examples = self.make_array(new_dataset.examples,val,tree.attr)
                 new_dataset.examples = new_examples
                 arr.append(new_dataset)
             estimated_values = self.find_percentages(current_dataset)
             for i in range(len(arr)):
                 arr[i] = self.find_percentages(arr[i])
-            # left_values = self.find_percentages(left_dataset)
-            # right_values = self.find_percentages(right_dataset)
-
+        
             #find deviations
             dev = self.find_deviation(estimated_values,arr)
             if dev < maxDeviation:
                 return self.find_max(estimated_values)
             else:
-                return dt
+                return tree
         else:
-            return dt
+            return tree
     
     def find_max(self,d):
         maximum = 0
