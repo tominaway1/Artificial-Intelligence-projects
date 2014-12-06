@@ -259,33 +259,50 @@ class DecisionTreeLearner(Learner):
                 new_examples.append(item)
         return new_examples
 
-    def prune_helper(self,tree,current_dataset,maxDeviation):
+    def prune_helper(self,tree,dataset,maxDeviation):
         #check left and right subtrees
         for (val, subtree) in tree.branches.items():
             if isinstance(subtree, DecisionTree):
-                new_dataset = deepcopy(current_dataset)
+                new_dataset = deepcopy(dataset)
                 new_examples = self.make_array(new_dataset.examples,val,tree.attr)
                 new_dataset.examples = new_examples
                 tree.branches[val] = self.prune_helper(subtree,new_dataset,maxDeviation)
 
         #check if you can prune
         if all(not isinstance(subtree,DecisionTree) for (val, subtree) in tree.branches.items()):
-            arr = []
-            for (val, subtree) in tree.branches.items():
-                new_dataset = deepcopy(current_dataset)
-                new_examples = self.make_array(new_dataset.examples,val,tree.attr)
-                new_dataset.examples = new_examples
-                arr.append(new_dataset)
-            estimated_values = self.find_percentages(current_dataset)
-            for i in range(len(arr)):
-                arr[i] = self.find_percentages(arr[i])
-        
-            #find deviations
-            dev = self.find_deviation(estimated_values,arr)
-            if dev < maxDeviation:
-                return self.find_max(estimated_values)
+            d = {}
+            total = 0
+            for item in dataset.examples:
+                total += 1
+                test = item[dataset.target]
+                if test in d:
+                    d[test] = d[test] + 1
+                else:
+                    d[test] = 1
+            deviation = 0
+            for val in dataset.values[tree.attr]:
+                t = {}
+                temp_total = 0
+                for item in dataset.examples:
+                    if item[tree.attr] == val:
+                        temp_total += 1
+                        test = item[dataset.target]
+                        if test in t:
+                            t[test] = t[test] + 1
+                        else:
+                            t[test] = 1
+                for key in t:
+                    SMALL_CONSTANT = .000000000000000000000000001
+                    expected = (temp_total*d[key]*1.0)/(total*1.0 + SMALL_CONSTANT)
+                    deviation += (expected-t[key]*1.0)**2/(expected + SMALL_CONSTANT)
+            if deviation < maxDeviation:
+                ans = self.find_max(d)
+                if not ans:
+                    return tree
+                return ans
             else:
                 return tree
+
         else:
             return tree
     
