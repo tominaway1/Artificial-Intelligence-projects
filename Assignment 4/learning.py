@@ -272,23 +272,29 @@ class DecisionTreeLearner(Learner):
         if all(not isinstance(subtree,DecisionTree) for (val, subtree) in tree.branches.items()):
             d = {}
             total = 0
+            for item in dataset.values[dataset.target]:
+                d[item] = 0
             for item in dataset.examples:
                 total += 1
                 test = item[dataset.target]
                 if test in d:
-                    d[test] = d[test] + 1
+                    temp = d[test]
+                    d[test] = temp + 1
                 else:
                     d[test] = 1
             deviation = 0
             for val in dataset.values[tree.attr]:
                 t = {}
                 temp_total = 0
+                for item in dataset.values[dataset.target]:
+                    t[item] = 0
                 for item in dataset.examples:
                     if item[tree.attr] == val:
                         temp_total += 1
                         test = item[dataset.target]
                         if test in t:
-                            t[test] = t[test] + 1
+                            temp = t[test] + 1
+                            t[test] = temp
                         else:
                             t[test] = 1
                 for key in t:
@@ -297,6 +303,12 @@ class DecisionTreeLearner(Learner):
                     deviation += (expected-t[key]*1.0)**2/(expected + SMALL_CONSTANT)
             if deviation < maxDeviation:
                 ans = self.find_max(d)
+                # maxim = 0
+                # ans = None
+                # for key in d:
+                #     if d[key] > maxim:
+                #         maxim = d[key]
+                #         ans = key
                 if not ans:
                     return tree
                 return ans
@@ -310,7 +322,7 @@ class DecisionTreeLearner(Learner):
         maximum = 0
         ans = None
         for key in d:
-            if d[key] >= maximum:
+            if d[key] > maximum:
                 maximum = d[key]
                 ans = key
         return ans
@@ -336,17 +348,17 @@ class DecisionTreeLearner(Learner):
             total += d[key]
         return total
 
-    def find_percentages(self,dataset):
-        inputs = dataset.inputs
-        vals = dataset.values
-        target = dataset.target
-        ans = {}
-        for item in vals[target]:
-            ans[item] = 0
-        for item in dataset.examples:
-            temp = ans[item[target]]
-            ans[item[target]] = temp + 1
-        return ans
+    # def find_percentages(self,dataset):
+    #     inputs = dataset.inputs
+    #     vals = dataset.values
+    #     target = dataset.target
+    #     ans = {}
+    #     for item in vals[target]:
+    #         ans[item] = 0
+    #     for item in dataset.examples:
+    #         temp = ans[item[target]]
+    #         ans[item[target]] = temp + 1
+    #     return ans
 
     def decision_tree_learning(self, examples, attrs, default=None):
         if len(examples) == 0:
